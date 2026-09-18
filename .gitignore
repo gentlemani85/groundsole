@@ -1,0 +1,26 @@
+# Groundsole .gitignore
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor & Agent runtime caches
+.idea/
+.vscode/
+*.swp
+*~
+.gemini/
+.antigravity/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Temporary files & logs
+*.tmp
+*.log
+scratch/
