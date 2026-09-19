@@ -18,6 +18,14 @@ This skill provides a unified, harness-agnostic interface for cognitive memory o
 
 At the conclusion of every dialogue turn, silently inspect whether a binding fact, status shift, decision, or permanent preference was established.
 
+### 🚨 Emotion as Smoke Detector & Turn-End Checklist
+- **Emotion as Milestone Sensor:** Strong user emotions (pride, relief, frustration, excitement) are smoke detectors signaling real-world breakthroughs or critical friction. Reflexively identify the underlying technical/status cause and persist it!
+- **Input Chunking Check:** If a user prompt contains a retrospective/milestone followed by a new task, never allow the first part to be lost in the execution of the second. Extract and persist facts first!
+- **Turn-End Checklist:** Before rendering the final response, silently verify:
+  1. Did a milestone, decision, or state shift occur?
+  2. Is it persisted in memory?
+  If yes, execute the persistence command.
+
 ### Trigger Categories & Namespaces
 Execute the following CLI command in the background:
 ```bash
