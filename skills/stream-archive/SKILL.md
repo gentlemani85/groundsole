@@ -78,3 +78,11 @@ Every session transcript saved to `00_MEMORY/transcripts/` must strictly adhere 
    Update `00_MEMORY/DYNAMIC_STATE.md` with current archive counts and operational focus.
 5. **Incremental Vector Ingestion:**  
    Index the new transcript into the local active database shard (`active.db`).
+6. **Mandatory Post-Archiving Quality Control (QC) & Report:**  
+   Immediately and autonomously perform the following verification checklist and present the results in a structured QC report:
+   - **Header Hierarchy:** Verify H1 title immediately followed by H2 first speaker (no metadata in transcript).
+   - **Hygiene:** Confirm total removal of `<CONTEXT_SUMMARY>`, `<USER_REQUEST>`, and raw tool telemetry.
+   - **Signature Integrity:** Verify signature existence and non-zero byte size in `00_MEMORY/summaries/`.
+   - **Vector State:** Confirm embeddings written to active vector shard.
+   - **Dynamic State:** Confirm stats synchronized in `00_MEMORY/DYNAMIC_STATE.md`.
+   - **Git Versioning:** Confirm local repository commit of transcript, signature, and state files.
