@@ -72,3 +72,43 @@ To avoid "Lost in the Middle" degradation and ballooning token consumption, Grou
 ## 3. Subagent Token Protection
 
 When subagents or background tasks are spawned, they halt their load order immediately after reading `index.md`. They bypass all domain modules and style guides, reserving 100% of their context budget for their specialized task.
+
+---
+
+## 4. The Three-Tier Vector & Fact Storage Architecture
+
+Groundsole prevents context rot and database contamination through strict physical separation:
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ Tier 1: Volatile Session Buffer (memory_buffer.db)          │
+│ • Mirrors active, uncommitted sessions across local harness │
+│ • Delta-indexing runs asynchronously in < 1 second           │
+│ • Serves as safety net / backup against accidental deletion │
+│ • Pruned during cleanup routines without polluting active   │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               │ Explicit Archiving Event
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Tier 2: Curated Active Memory (memory_active.db)            │
+│ • Pure sink for verified Markdown files in transcripts/     │
+│ • Guaranteed idempotent via UNIQUE(content_hash)            │
+│ • Zero ephemeral noise, zero zombie vectors                 │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               │ Epoched at capacity (~40k chunks)
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Tier 3: Sealed Epoch Archives (memory_archive_001.db ...)   │
+│ • Immutable, read-only cold storage                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Causal State & Fact Extraction Protocol (LangMem)
+Facts, parameters, and binding decisions do not wait for vector consolidation. At the end of every dialog turn, the coprocessor autonomously checks if a durable fact was established:
+- **Decisions & Directional Shifts:** Tool choices, approved roadmaps, canceled plans.
+- **Counterpart & Project Facts:** Quotes, commitments, deadlines, rates.
+- **Infrastructure & Numerical State:** Measured values, consumption, hardware specs.
+- **Universal Catch-All:** Any information whose absence in future sessions would cause friction, repetition, or false assumptions.
+

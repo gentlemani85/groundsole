@@ -28,7 +28,8 @@ MODEL_NAME = "jinaai/jina-embeddings-v2-base-de"
 def discover_databases() -> List[str]:
     if not os.path.exists(VECTORS_DIR):
         return []
-    return sorted(glob.glob(os.path.join(VECTORS_DIR, "*.db")))
+    raw_dbs = sorted(glob.glob(os.path.join(VECTORS_DIR, "*.db")))
+    return sorted(list(set(os.path.realpath(f) for f in raw_dbs)))
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     dot = np.dot(a, b.T)

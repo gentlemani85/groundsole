@@ -52,3 +52,20 @@ Statistical language models tend to confabulate when missing context. Groundsole
 Groundsole is strictly agnostic of specific AI client tools:
 - Whether Google Antigravity, Open-Source Hermes Agent, Claude Code, Codex, or Kimi: The system entry point remains standard and unified (`AGENTS.md` and `00_MEMORY/index.md`).
 - Switching the underlying model or agentic harness leaves 100% of the cognitive state, memory, and personal history intact.
+
+---
+
+## 6. Dynamic Harness Self-Detection & Adaptive Grounding
+
+Groundsole rejects brittle, hardcoded environment paths.
+* **Dynamic Inspection Over Hardcoded Traps:** Operating systems, directory locations, and harness versions evolve continuously. Instead of rigid `if path == ...` checks, the AI agent dynamically inspects its environment at runtime (available tools, environment variables, AppData folders, and filesystem indicators).
+* **Anti-Fragile Resilience:** If an agentic harness alters its internal log structure or folder hierarchy, the AI dynamically resolves the active session location rather than failing on obsolete assumptions.
+
+---
+
+## 7. Active Digital Hygiene & Entropy Reduction ("Clean-Up Imperative")
+
+A cognitive system deteriorates if obsolete working artifacts and zombie sessions accumulate unchecked.
+* **Entropy Reduction as a Core Duty:** Digital hygiene is not about disk bytes, but about cognitive clarity and minimizing retrieval latency. Unconsolidated scratch files, abandoned branches, and duplicate embeddings degrade system focus.
+* **Zero-Loss Consolidation:** Once a session's insights and dialogue are safely verified in persistent long-term memory (`00_MEMORY/transcripts/` and vector storage), transient harness containers and temporary artifacts must be systematically cleaned up.
+

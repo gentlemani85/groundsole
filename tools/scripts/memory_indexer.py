@@ -30,7 +30,8 @@ WORKSPACE_DIR = find_workspace_root()
 RAW_CHATS_DIR = os.path.join(WORKSPACE_DIR, "00_MEMORY", "transcripts")
 VECTORS_DIR = os.path.join(WORKSPACE_DIR, "00_MEMORY", "vectors")
 os.makedirs(VECTORS_DIR, exist_ok=True)
-DB_PATH = os.path.join(VECTORS_DIR, "active.db")
+DB_PATH = os.path.join(VECTORS_DIR, "memory_active.db")
+BUFFER_DB_PATH = os.path.join(VECTORS_DIR, "memory_buffer.db")
 
 MODEL_NAME = "jinaai/jina-embeddings-v2-base-de"
 
@@ -58,12 +59,14 @@ def init_db(db_path: str = DB_PATH):
             header_context TEXT,
             content TEXT NOT NULL,
             token_count INTEGER,
-            embedding BLOB NOT NULL,
+            content_hash TEXT,
+            embedding BLOB,
             FOREIGN KEY (filename) REFERENCES indexed_files(filename) ON DELETE CASCADE
         )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_chunks_file ON chunks(filename)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_chunks_speaker ON chunks(speaker)")
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_chunks_content_hash ON chunks(content_hash)")
     conn.commit()
     conn.close()
 
@@ -170,10 +173,11 @@ def index_file(filepath: str, embedding_model, db_path: str = DB_PATH) -> int:
 
     for idx, (chunk, emb) in enumerate(zip(chunks, embeddings)):
         emb_blob = np.array(emb, dtype=np.float32).tobytes()
+        chash = hashlib.md5(chunk["content"].encode("utf-8")).hexdigest()
         c.execute("""
-            INSERT INTO chunks (filename, chunk_index, speaker, timestamp_str, header_context, content, token_count, embedding)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (meta["filename"], idx, chunk["speaker"], chunk["timestamp_str"], chunk["header_context"], chunk["content"], chunk["token_count"], emb_blob))
+            INSERT OR IGNORE INTO chunks (filename, chunk_index, speaker, timestamp_str, header_context, content, token_count, content_hash, embedding)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (meta["filename"], idx, chunk["speaker"], chunk["timestamp_str"], chunk["header_context"], chunk["content"], chunk["token_count"], chash, emb_blob))
 
     conn.commit()
     conn.close()
