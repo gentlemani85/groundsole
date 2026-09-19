@@ -15,3 +15,15 @@ Any AI agent operating within this workspace reads **only these 3 files** by def
 
 ## Operational Rule
 No heavy background syncing daemons or complex multi-agent frameworks are permitted when simple local plaintext Markdown files suffice.
+
+---
+
+## 🧠 Autonomous Fact & Decision Memory Protocol
+At the conclusion of every turn, regardless of harness (Hermes, Antigravity, Claude, Codex), silently evaluate if a permanent fact, binding decision, deadline, infrastructure parameter, or status shift occurred. If YES, persist it via:
+```bash
+python3 scripts/memory.py add "<Namespace>" "<Key>" "<Content>"
+```
+- **Decisions & Status Shifts:** Choices, milestones, direction changes -> Namespace: `Decisions` or `<ProjectID>`
+- **Entity Facts & Dates:** External commitments, client facts -> Namespace: `<ProjectID>` or `<Contact>`
+- **Infrastructure & Assets:** System parameters, paths, credentials -> Namespace: `Infrastructure`
+- **Universal Catch-All:** Any fact whose absence in future chats would cause friction or repeated questions.

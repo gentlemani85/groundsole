@@ -122,6 +122,7 @@ def scaffold_instance(target_dir: Path, user_name: str, profile: str):
     target_skills.mkdir(exist_ok=True)
     all_skills = [
         "stream-archive",
+        "memory-engine",
         "memory-recall",
         "document-export",
         "mail-manager",
