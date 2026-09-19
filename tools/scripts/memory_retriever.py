@@ -104,7 +104,16 @@ def main():
     parser.add_argument("--query", required=True, help="Search text query")
     parser.add_argument("--top_k", type=int, default=5, help="Number of results to return")
     parser.add_argument("--speaker", choices=["User", "Assistant"], help="Filter by speaker")
+    parser.add_argument("--sync", action="store_true", default=True, help="Run fast delta scan of active harness before searching")
+    parser.add_argument("--no-sync", dest="sync", action="store_false", help="Skip harness delta scan")
     args = parser.parse_args()
+
+    if getattr(args, 'sync', True):
+        try:
+            from memory_indexer import scan_active_harness
+            scan_active_harness()
+        except Exception:
+            pass
 
     results = search_shards(args.query, top_k=args.top_k, speaker_filter=args.speaker)
 

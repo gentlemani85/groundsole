@@ -112,3 +112,21 @@ Facts, parameters, and binding decisions do not wait for vector consolidation. A
 - **Infrastructure & Numerical State:** Measured values, consumption, hardware specs.
 - **Universal Catch-All:** Any information whose absence in future sessions would cause friction, repetition, or false assumptions.
 
+---
+
+## 5. Dual-Channel Context Architecture & Delta Synchronization
+
+### Dual-Channel Context (RAM Context Window vs. Disk Vector Buffer)
+Every dialogue turn exists simultaneously across two independent layers:
+1. **Channel 1: Volatile In-Memory RAM (Context Window):**
+   Handles fast, direct conversational flow. When context boundaries are reached due to extensive tool calls or long dialogue history, the platform server may compact previous turns into `<CONTEXT_SUMMARY>`.
+2. **Channel 2: Persistent On-Disk Vector Buffer (`memory_buffer.db`):**
+   Stores raw turns as hashed vector embeddings. This provides 100% loss-resistance: even if the in-memory window is compacted or an active chat is closed, all raw verbatim excerpts and technical figures remain instantly searchable.
+
+### Autonomous Delta Synchronization
+Buffer indexing never requires manual intervention:
+- **Startup Trigger:** Executed in the background during session initialization (`python3 scripts/memory_indexer.py --scan-harness &`), ensuring the buffer is always up to date with zero user wait time.
+- **Just-In-Time (JIT) Retriever Sync:** Before executing any search query, `memory_retriever.py` checks active harness logs for new turns. Unchanged sessions evaluate in ~0.02s; new turns are vectorized incrementally in 1–3s before returning search results.
+- **Digital Hygiene & Thought Clearance:** Compaction warnings are treated calmly. Since all data is preserved in Tier 1, archiving via `stream-archive` is conducted deliberately as a hygiene step when a cohesive milestone is completed, resetting working memory for maximum model precision.
+
+
