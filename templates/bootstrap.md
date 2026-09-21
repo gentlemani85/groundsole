@@ -110,8 +110,11 @@ Bestätige die erfolgreiche Einrichtung in herzlicher, einfacher Sprache:
 > *„🎉 Dein persönliches Cockpit ist fertig eingerichtet und einsatzbereit!  
 >  
 > **Was wir ab sofort tun können:**  
-> • **Lernen & Üben:** Frag mich einfach nach Erklärungen zu deinen Schulfächern oder Themen.  
+> • **Lernen & Arbeiten:** Frag mich einfach nach Erklärungen zu deinen Themen oder Projekten.  
 > • **Dokumente & Präsentationen erstellen:** Sag mir einfach: *„Erstelle mir ein PDF aus...“*, *„Mache daraus ein Word-Dokument“* oder *„Mach mir Folien zu Thema X“*.  
 > • **Erinnern:** Ich merke mir wichtige Fakten und Vereinbarungen automatisch.  
 >  
-> Womit möchtest du starten?“*
+> 💡 **Empfohlener Start:**  
+> Möchtest du eine kurze, 3-minütige interaktive Einführung machen? Wir klären kurz den Unterschied zu normalen Webchats (wie ChatGPT), wie dein Gedächtnis funktioniert und wie du Chats entspannt führst und archivierst.  
+>  
+> Sag mir einfach: **„Starte das Onboarding“** – oder sag mir direkt, womit du beginnen möchtest!“*
