@@ -125,6 +125,7 @@ def scaffold_instance(target_dir: Path, user_name: str, profile: str):
         "memory-engine",
         "memory-recall",
         "document-export",
+        "presentation-deck",
         "mail-manager",
         "system-hygiene",
         "inbox-triage"

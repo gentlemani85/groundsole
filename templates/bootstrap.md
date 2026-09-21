@@ -97,8 +97,9 @@ Remove-Item -Recurse -Force .temp_groundsole
 Nach diesem Schritt verfügt der Nutzer über:
 1. **Dauerhaftes Gedächtnis:** Kann sich an frühere Gespräche, Notizen und Vereinbarungen erinnern (`memory.py`, `memory_retriever.py`).
 2. **Dokumenten-Export:** Erstellt auf Zuruf saubere **Word-Dokumente (`.docx`)** und druckreife **PDF-Dateien (`.pdf`)** (`document_exporter.py`).
-3. **E-Mail-Verbindung:** Kann bei Bedarf mit Gmail oder dem eigenen Postfach verbunden werden (`mail_helper.py`).
-4. **Schulfach- / Projekt-Cockpit:** Übersicht über Fächer, Aufgaben und Ziele (`00_MEMORY/modules/`).
+3. **16:9 Präsentationen (Markdown als SSOT):** Erstellt interaktive 16:9 HTML-Folien, deren Text der Nutzer direkt im Editor in einer Markdown-Datei bearbeiten kann (`skills/presentation-deck`, `tools/scripts/sync_slides.py`).
+4. **E-Mail-Verbindung:** Kann bei Bedarf mit Gmail oder dem eigenen Postfach verbunden werden (`mail_helper.py`).
+5. **Schulfach- / Projekt-Cockpit:** Übersicht über Fächer, Aufgaben und Ziele (`00_MEMORY/modules/`).
 
 ---
 
@@ -110,7 +111,7 @@ Bestätige die erfolgreiche Einrichtung in herzlicher, einfacher Sprache:
 >  
 > **Was wir ab sofort tun können:**  
 > • **Lernen & Üben:** Frag mich einfach nach Erklärungen zu deinen Schulfächern oder Themen.  
-> • **Dokumente erstellen:** Sag mir einfach: *„Erstelle mir ein PDF aus...“* oder *„Mache daraus ein Word-Dokument“*.  
+> • **Dokumente & Präsentationen erstellen:** Sag mir einfach: *„Erstelle mir ein PDF aus...“*, *„Mache daraus ein Word-Dokument“* oder *„Mach mir Folien zu Thema X“*.  
 > • **Erinnern:** Ich merke mir wichtige Fakten und Vereinbarungen automatisch.  
 >  
 > Womit möchtest du starten?“*
