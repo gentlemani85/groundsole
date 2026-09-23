@@ -104,6 +104,7 @@ groundsole/
         ├── memory_indexer.py          # FastEmbed Jina ONNX transcript vector indexer
         ├── memory_retriever.py        # Multi-DB federated semantic search engine
         ├── knowledge_graph.py         # Zero-API relational knowledge graph (SQLite)
+        ├── check_integrity.py         # Zero-dependency link, module & dreaming linter
         ├── document_exporter.py       # Word (.docx) and print-ready PDF generator
         └── mail_helper.py             # Zero-dependency IMAP/SMTP email assistant
 ```
