@@ -215,11 +215,123 @@ def scan_temporal_anomalies(target_dir):
                             
     return anomalies
 
+# ── Skill command check ──────────────────────────────────────────────────────
+# Skill files carry executable commands, and those commands rot silently: a tool
+# moves, an OS-specific invocation survives a platform switch, a directory is
+# retired. This check reads commands only (code blocks and inline code – never
+# prose, since prose legitimately names an old path in order to deprecate it).
+#
+# A line carrying the marker "pfad-check: ok" is deliberately exempt. Use it for
+# documented alternatives, e.g. a Windows invocation kept for other machines.
+
+RETIRED_LOCATION_MARKERS = {
+    "/.gemini/config/scripts": "retired location – tools live in tools/scripts/",
+    "/.gemini/config/venv": "retired location – one shared virtualenv is used",
+    "PARTNERSCHAFT": "retired directory – no longer exists",
+    "%USERPROFILE%\\.gemini\\config\\scripts": "retired location – tools live in tools/scripts/",
+}
+
+WINDOWS_ONLY_MARKERS = (
+    "$env:USERPROFILE",
+    "%USERPROFILE%",
+    "\\Scripts\\python.exe",
+    "```powershell",
+)
+
+ABS_PATH_SPLIT_RE = re.compile(r"[\s`\"'()\[\],;|&]+")
+
+EXEMPTION_MARKER = "pfad-check: ok"
+
+
+def _absolute_script_paths(segment):
+    """
+    Absolute script paths referenced by a command. Relative paths are ignored on
+    purpose: they depend on a working directory the skill does not state, so any
+    verdict on them would be guesswork.
+    """
+    for token in ABS_PATH_SPLIT_RE.split(segment):
+        if token.startswith("/") and token.endswith(".py"):
+            yield token
+
+
+def resolve_skills_dir(target_dir, explicit=None):
+    """Locate the skill tree: an explicit path wins, else the conventional dirs."""
+    if explicit:
+        candidate = Path(explicit)
+        return candidate if candidate.is_dir() else None
+    for candidate in (Path(target_dir) / ".agents" / "skills", Path(target_dir) / "skills"):
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+def _iter_command_segments(lines):
+    """
+    Yield (line_number, segment, whole_line) for everything meant as a command:
+    lines inside fenced code blocks plus inline code spans. Plain prose is not
+    checked on purpose.
+    The whole line is passed along so an exemption marker takes effect.
+    """
+    in_fence = False
+    for num, line in enumerate(lines, start=1):
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            yield num, line, line
+        else:
+            for segment in re.findall(r"`([^`]+)`", line):
+                yield num, segment, line
+
+
+def scan_skill_paths(target_dir, skills_dir=None):
+    """
+    Check skill files (<skills_dir>/*/SKILL.md) for commands that cannot run
+    here: retired storage locations, Windows-only syntax, missing scripts.
+    """
+    findings = []
+    root = resolve_skills_dir(target_dir, explicit=skills_dir)
+    if root is None:
+        return findings
+
+    for skill_md in sorted(Path(root).glob("*/SKILL.md")):
+        try:
+            lines = skill_md.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+
+        for num, segment, line in _iter_command_segments(lines):
+            if EXEMPTION_MARKER in line:
+                continue
+
+            retired = next((m for m in RETIRED_LOCATION_MARKERS if m in segment), None)
+            if retired:
+                findings.append((skill_md, num, "retired", retired,
+                                 RETIRED_LOCATION_MARKERS[retired], segment.strip()))
+                continue
+
+            if any(m in segment for m in WINDOWS_ONLY_MARKERS):
+                findings.append((skill_md, num, "windows", "",
+                                 "Windows-only syntax – cannot run on this platform",
+                                 segment.strip()))
+                continue
+
+            for script_path in _absolute_script_paths(segment):
+                if not Path(script_path).exists():
+                    findings.append((skill_md, num, "missing", script_path,
+                                     "script does not exist", segment.strip()))
+                    break
+
+    return findings
+
+
 def main():
     parser = argparse.ArgumentParser(description="Groundsole Integrity Linter & Dreaming Assistant")
     parser.add_argument("--target", default=".", help="Root directory to inspect (default: current directory)")
     parser.add_argument("--strict", action="store_true", help="Exit with non-zero status on warnings")
     parser.add_argument("--include-transcripts", action="store_true", help="Also scan frozen historical transcripts (default: skipped)")
+    parser.add_argument("--skills-dir", default=None,
+                        help="Skill tree to check (default: <target>/.agents/skills, else <target>/skills)")
     args = parser.parse_args()
     
     root_dir = Path(args.target).resolve()
@@ -259,7 +371,24 @@ def main():
             print(f"   • [{fname}:{line_num}] Past date {d_str}: \"{line[:80]}{'...' if len(line) > 80 else ''}\"")
     else:
         print("✅ Dreaming Audit: No past dates or overdue milestones in active focus.")
-        
+
+    skill_findings = scan_skill_paths(root_dir, skills_dir=args.skills_dir)
+    skills_dir = resolve_skills_dir(root_dir, explicit=args.skills_dir)
+    if skill_findings:
+        has_errors = True
+        print(f"\n🛠️  Skill commands that cannot run ({len(skill_findings)}):")
+        for path, num, kind, marker, reason, line in skill_findings:
+            try:
+                rel = path.relative_to(root_dir)
+            except ValueError:
+                rel = path
+            print(f"   • [{kind}] {rel}:{num} – {reason}")
+            print(f"       {line[:110]}")
+    elif skills_dir is not None:
+        print(f"✅ Skill commands: every command in {skills_dir.name}/ runs on this machine.")
+    else:
+        print("ℹ️  Skill commands: no skill tree found to check.")
+
     print("=" * 60)
     
     if has_errors:

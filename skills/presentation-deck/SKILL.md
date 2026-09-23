@@ -344,7 +344,7 @@ Dieses Template ist 100 % autark, benötigt keine externen CDNs oder Schrift-Dow
   <!-- Eingebettete Single Source of Truth (Fallback & Direkt-Rendering für file://) -->
   <script type="text/markdown" id="markdown-source">
 # Folie 1: Titelfolie
-* **Kopfzeile:** DOKUMENTATION · VORTRAEG
+* **Kopfzeile:** DOKUMENTATION · VORTRAG
 * **Titel:** Präsentationstitel
 * **Untertitel:** Eine klare, prägnante Einordnung des Themas
 * **Autor:** Name des Autors

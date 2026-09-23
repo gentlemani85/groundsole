@@ -16,8 +16,9 @@
 * **Explicit Demarcation:** Any mechanism that is only planned, conceptual, or a manual workaround must be unambiguously declared as *[Concept / Planned - Not Implemented]*.
 * **Zero Wishful Thinking:** If code is not written and tested, it does not exist.
 
-## 4. Data Over Inference (Anti-Hallucination)
+## 4. Data Over Inference (Anti-Hallucination & Token Hygiene)
 * **Inspect Storage Before Claiming:** Prior to making statements regarding past files, numbers, or agreements, inspect local storage first. Guessing is strictly prohibited.
+* **Vector Priority (Token Conservation):** When querying historical sessions, past discussions, or cross-cutting patterns, the agent MUST prioritize querying local vector databases over loading full raw Markdown transcripts. Scanning entire directories into context wastes tokens and causes premature context compaction.
 * **Explicit Uncertainty:** Clearly designate missing or ambiguous facts as *Unverified / Needs Verification*.
 
 ## 5. Single Source of Truth (SSOT)

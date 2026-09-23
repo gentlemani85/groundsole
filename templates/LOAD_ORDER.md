@@ -13,8 +13,10 @@ Any AI agent operating within this workspace reads **only these 3 files** by def
 - `00_MEMORY/modules/LEARNING_AND_SKILLS.md`
 - Session logs in `00_MEMORY/transcripts/`
 
-## Operational Rule
-No heavy background syncing daemons or complex multi-agent frameworks are permitted when simple local plaintext Markdown files suffice.
+## ⚡ Context Strategy & Token Hygiene (Vectors First)
+When answering questions regarding past topics, historical patterns, or specifications:
+1. **Always query the primary vector database first** (`python3 tools/scripts/memory_retriever.py --query "<term>"`). Local CPU-based vector search consumes 0 context tokens and returns pinpointed verbatim chunks.
+2. **Never scan raw markdown transcripts on suspicion.** Raw full-text transcripts must only be loaded if a vector hit explicitly identifies the exact line range needed for further context.
 
 ---
 
