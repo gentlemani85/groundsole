@@ -23,10 +23,15 @@ def find_markdown_links(content):
     """
     Extracts all local relative markdown links: [label](target)
     Ignores external URLs (http, https, mailto, etc.) and pure in-page anchors (#).
+    Ignores links inside code blocks or inline code snippets.
     """
+    # Strip fenced code blocks and inline code so examples are not evaluated
+    clean_content = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+    clean_content = re.sub(r'`[^`\n]+`', '', clean_content)
+
     pattern = r'(?:!?)\[([^\]]*)\]\(([^)]+)\)'
     links = []
-    for match in re.finditer(pattern, content):
+    for match in re.finditer(pattern, clean_content):
         target = match.group(2).strip()
         # Strip title only if quoted: (target "title") or (target 'title')
         title_match = re.match(r'^(.*?)\s+["\'].*?["\']$', target)
@@ -61,6 +66,12 @@ def check_link_target(source_file, target_link, root_dir):
         
     normalized = decoded_target.replace('\\', '/').lstrip('/')
     
+    # Template blueprint resolution (templates link to 00_MEMORY/ which maps to templates/ in repo)
+    if "templates" in source_file.parts:
+        tpl_resolved = source_file.parent / decoded_target.replace('00_MEMORY/', '')
+        if tpl_resolved.exists():
+            return True
+
     # Locate actual workspace root (containing 00_MEMORY or memory)
     ws_root = next((p for p in [root_dir] + list(root_dir.parents) if (p / "00_MEMORY").exists() or (p / "memory").exists()), root_dir)
     ws_name = ws_root.name
