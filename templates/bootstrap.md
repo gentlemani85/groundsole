@@ -7,7 +7,7 @@
 > **WICHTIGE REGEL FÜR DIE SPRACHE:**  
 > Sprich mit dem Nutzer in einer **einfachen, warmen, verständlichen Alltagssprache**.  
 > Verwende **keinerlei Entwickler-Jargon** (keine Begriffe wie *„FastEmbed“*, *„ONNX Runtime“*, *„Scaffolding“*, *„Sharding“* oder *„relationale Knotendatenbank“*).  
-> Erkläre alle Schritte so, dass sie auch ein Schüler (wie Alex) oder ein Nicht-Techniker sofort versteht.
+> Erkläre alle Schritte so, dass sie auch ein Schüler oder ein Nicht-Techniker sofort versteht.
 
 ---
 

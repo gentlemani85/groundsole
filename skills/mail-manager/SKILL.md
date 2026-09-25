@@ -41,7 +41,7 @@ Beim Entwerfen von E-Mails oder geschäftlichen Anschreiben gelten folgende Grou
 * **Kein kollektives „Wir“:** Verfasse Nachrichten stets aus der authentischen Ich-Perspektive des Nutzers („Ich“, „meine Office-Tage“, „starte ich“, „gebt mir Bescheid“). Vermeide unpersönlichen Firmen-Plural („wir haben gebaut“, „wir prüfen gemeinsam“).
 * **Deskriptive Sachsprache statt Werbe-Floskeln:** Prozesse sachlich-deskriptiv formulieren (z. B. „werden überprüft“, „gibt es ein Cockpit“ statt „wir bringen alle Laptops auf Vordermann“).
 * **Verbindliche Grenzziehung & klare Zeitfenster:** Eigene Arbeitstage, Kapazitäten und Fristen verbindlich und unmissverständlich benennen („an meinen Office-Tagen“, „zeitlich bitte reservieren“).
-* **Präzise Begrifflichkeit:** Reale Arbeitsbegriffe und Systemnamen direkt verwenden (z. B. *„agentic harness“ / persönlicher KI-Assistent*, *password manager*).
+* **Präzise Begrifflichkeit:** Reale Arbeitsbegriffe und Systemnamen direkt verwenden (z. B. *„agentic harness“ / persönlicher KI-Assistent*, Passwort-Manager).
 * **Gezielte Schnittstellen-Adressierung:** Relevante Ansprechpartner direkt mit konkreten Fragen einbinden (`@Name: Bitte um Info, ob...`).
 
 ---

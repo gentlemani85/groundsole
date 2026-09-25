@@ -53,7 +53,7 @@ Dieser Skill führt neue Nutzer (Schüler, Wissensarbeiter, Unternehmer oder Ent
 
 **Erklärung der 2 Gedächtnis-Ebenen:**
 1. **Automatischer Faktenspeicher:**  
-   Wann immer du mir eine wichtige persönliche Information, eine feste Entscheidung oder eine Regel nennst (z. B. *„Ich trinke keinen Kaffee mehr“*, *„Mein Sohn heißt Alex“*, *„Projekt X hat Deadline Ende November“*), merke ich mir das automatisch in deiner lokalen Datenbank. Wenn du morgen einen neuen Chat öffnest, weiß ich das immer noch.
+   Wann immer du mir eine wichtige persönliche Information, eine feste Entscheidung oder eine Regel nennst (z. B. *„Ich trinke keinen Kaffee mehr“*, *„Mein Kollege heißt Alex“*, *„Projekt X hat Deadline Ende November“*), merke ich mir das automatisch in deiner lokalen Datenbank. Wenn du morgen einen neuen Chat öffnest, weiß ich das immer noch.
 2. **Deine Lebens- & Arbeitsmodule (`00_MEMORY/modules/`):**  
    Alles hat einen festen Ort. Es gibt strukturierte Textdateien für deine Projekte, deine Finanzen oder deine Schulfächer. Wir müssen nichts suchen – es existiert immer nur eine einzige verbindliche Wahrheit.
 3. **100 % lokal & privat:**  

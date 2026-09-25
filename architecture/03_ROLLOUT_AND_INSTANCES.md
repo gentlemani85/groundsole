@@ -29,7 +29,7 @@ Groundsole resolves this via a decoupled Hub-and-Spoke model:
                  │ 1. init_instance.py (One-time Scaffolding)
                  ▼
 ┌─────────────────────────────────┐
-│ New Instance (e.g. Alex HTL)   │
+│ New Instance (e.g. Student Cockpit)   │
 │ • AGENTS.md & 00_MEMORY/        │
 │ • skills/teach                  │
 │ • version.json (v0.1.0)         │
