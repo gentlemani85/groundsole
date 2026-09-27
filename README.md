@@ -24,6 +24,8 @@ Even modern **Agentic Harnesses** (such as *Claude Code*, *Google Antigravity*, 
 2. **A Genuine Counterpart (Grounded Coprocessor):** Your AI partner knows your history, real project states, contracts, and operational guidelines. It thinks alongside you, rigorously validates biophysical causality, and challenges incomplete assumptions rather than generating superficial polite text.
 3. **Seamless Shared Cognitive Spaces (Teams & Collaborators):** Decentralized cognition hubs live directly within their respective project directories (`.agents/`). Multiple team members and distinct AI agents can work concurrently against the exact same grounded state without locking or data conflict.
 4. **Radical Provider & Tool Neutrality (Sovereignty):** Your context, memory, and history reside entirely in open text formats (Markdown) and local SQLite databases on your hard drive—never locked into a proprietary vendor cloud. You can use Claude Code today, switch to Hermes Agent tomorrow, and run a fully offline open-source model (such as Mistral or Llama) the day after: your persistent counterpart remains identical.
+5. **Local-First AI Architecture:** Groundsole adheres to the **Local-First AI Manifesto**. Data, memory, tools, and execution run on your local device. The cloud LLM is treated as an interchangeable "inference utility" (commodity power). Organizations and individuals build 100% owned digital assets rather than renting closed SaaS portals.
+
 
 ---
 

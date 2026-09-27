@@ -24,6 +24,8 @@ Selbst moderne **Agentic Harnesses** (wie *Claude Code*, *Google Antigravity*, *
 2. **Ein echtes Gegenüber (Koprozessor auf Augenhöhe):** Dein KI-Partner kennt deine Historie, deine echten Projektstände, Verträge und Richtlinien. Er denkt mit, prüft biophysikalische Kausalitäten und widerlegt unvollständige Annahmen, statt dir bloß nach dem Mund zu reden.
 3. **Geteilte Wissensräume ohne Bruch (Team & Partnerschaft):** Kognitions-Hubs liegen dezentral direkt in den jeweiligen Ordnern (`.agents/`). Mehrere Menschen und unterschiedliche KI-Systeme können parallel auf demselben realen Datenstand arbeiten, ohne sich gegenseitig zu blockieren oder Abhängigkeiten zu erzeugen.
 4. **Vollkommene Tool- und Modell-Neutralität (Souveränität):** Dein Kontext und deine Geschichte liegen in offenen Textformaten (Markdown) und lokalen SQLite-Datenbanken direkt auf deiner Festplatte – nicht in einem Cloud-Silo. Du kannst heute mit Claude Code arbeiten, morgen in Hermes Agent wechseln und übermorgen ein lokales Open-Source-Modell (wie Mistral oder Llama) nutzen: Dein Gegenüber bleibt dasselbe.
+5. **Local-First AI Architektur:** Groundsole folgt konsequent dem **Local-First AI Manifest**. Daten, Gedächtnis, Werkzeuge und Ausführung laufen auf deinem eigenen Rechner. Das Cloud-LLM wird als austauschbarer „Inferenz-Strom“ (Commodity) genutzt. Organisationen und Menschen bauen eigene, dauerhafte digitale Assets auf, anstatt geschlossene SaaS-Portale zu mieten.
+
 
 ---
 
