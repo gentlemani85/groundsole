@@ -93,3 +93,24 @@ There is a fundamental boundary between the "brain" (the reasoning model / cogni
 * **Harness Evolutions Are Disposable:** Features like split canvases, artifact sidebars, or automated UI tooling are properties of the host harness (Claude Code, Hermes Agent, Antigravity, Cursor), not of the cognitive core.
 * **Radical Cognitive Independence:** Groundsole ensures that 100% of the cognitive state, memory, and personal history live on the user's local disk in open formats (Markdown and SQLite). If a commercial harness alters its pricing, introduces proprietary lock-in, or changes its terms, the entire cognitive workspace can be connected to an alternative harness or local open-source model within minutes with zero context loss.
 
+---
+
+## 11. The Pirahã Principle (Strict Evidence Over Assertion)
+
+Inspired by the epistemology of the Pirahã—who strictly witness and report only what has been directly perceived, verified, or grounded in immediate reality:
+* **Zero Plausible Confabulation:** An agent must never introduce generalizations, speculative consensus, or unverified claims into documentation (e.g., "in many consultations", "most organizations", "commonly observed practice").
+* **Strict Citation and Proof Imperative:** Any technical, legal, contractual, or architectural assertion must be anchored in an exact, verifiable primary source (official documentation, explicit contract clauses, tested source code).
+* **Demarcation of the Unknown:** If an empirical fact, contract detail, or system behavior cannot be directly proven or referenced, it must not be asserted. It must either remain unmentioned or be explicitly declared as an *Open Question / Unverified Assumption*.
+
+---
+
+## 12. Local-First AI Architecture (Client-Side Instrument Over SaaS Blackbox)
+
+Groundsole is rooted in the **Local-First AI Manifesto**:
+* **Client-Side Sovereignty:** Data, memory, tools, and execution run on the user's device. The cloud LLM is treated strictly as an interchangeable "inference utility" (commodity power).
+* **Asset Building Over Subscription Renting:** Organizations and individuals build permanent, 100% owned digital assets (knowledge graph, vector shards, workflow skills) rather than renting closed SaaS portals.
+* **Zero Vendor Lock-in & Privacy by Architecture:** Privacy and GDPR compliance are guaranteed by local client-side execution rather than corporate policy promises.
+
+
+
+
