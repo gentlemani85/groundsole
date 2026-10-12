@@ -75,14 +75,16 @@ groundsole/
 ├── README_DE.md                       # German edition
 ├── version.json                       # Upstream release tracking
 ├── architecture/                      # Foundational architectural principles
-│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # Ground test, causality & As-Is truthfulness
-│   ├── 02_MEMORY_HIERARCHY.md         # RAM vs. Long-term memory, 3-tier loading strategy
+│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # The 14 Invariants, Ground test & Local-First AI
+│   ├── 02_MEMORY_HIERARCHY.md         # Plaintext SSOT -> KV -> Vector -> Knowledge Graph
 │   ├── 03_ROLLOUT_AND_INSTANCES.md    # Decoupled Hub-and-Spoke model
-│   └── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB sharding & cloud-sync resilience
+│   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB sharding & local SSD vs. cloud sync
+│   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Tier Document Governance & Derived Views
+│   └── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-Neutral Entry Point & The Minimal Core Triad
 ├── templates/                         # Clean boilerplate templates
-│   ├── AGENTS.md                      # Universal agent entry point
+│   ├── AGENTS.md                      # Universal agent entry point (Minimal Core Triad)
 │   ├── index.md                       # Authoritative memory index
-│   ├── LOAD_ORDER.md                  # Minimal runtime load order
+│   ├── LOAD_ORDER.md                  # Minimal runtime load order (legacy fallback)
 │   ├── STYLE_AND_GUARDRAILS.md        # Coprocessor tone & causality checks
 │   ├── DYNAMIC_STATE.md               # Active operational focus
 │   ├── bootstrap.md                   # Self-Executing Master Bootstrap Prompt
@@ -93,8 +95,12 @@ groundsole/
 │       └── LEARNING_AND_SKILLS.md     # Academic curricula & skill mastery
 ├── skills/                            # Pre-configured Groundsole skills
 │   ├── stream-archive/                # Sanitizes, signs, and freezes sessions into transcripts
+│   ├── memory-engine/                 # Autonomous memory persist & multi-tier retrieval engine
 │   ├── memory-recall/                 # Unified search across vectors, graph, facts & plaintext
 │   ├── document-export/               # Exports Markdown to Word (.docx) and A4 PDF (.pdf)
+│   ├── presentation-deck/             # Self-contained 16:9 interactive HTML presentations
+│   ├── groundsole-onboarding/         # Cognitive onboarding & interactive tutorial
+│   ├── space-sync/                    # Deterministic delta sync across distributed team spaces
 │   ├── mail-manager/                  # Checks and sends emails via IMAP/SMTP (Gmail, Outlook)
 │   ├── system-hygiene/                # Entropy reduction, cache cleanup & link audit
 │   └── inbox-triage/                  # Deterministic ingestion of raw files from Inbox/
@@ -105,6 +111,7 @@ groundsole/
         ├── memory.py                  # Key-value fact store with cloud conflict resolution
         ├── memory_indexer.py          # FastEmbed Jina ONNX transcript vector indexer
         ├── memory_retriever.py        # Multi-DB federated semantic search engine
+        ├── crystallize_memory.py      # Post-archival fact & graph crystallizer (Gemini Flash Lite)
         ├── knowledge_graph.py         # Zero-API relational knowledge graph (SQLite)
         ├── check_integrity.py         # Zero-dependency link, module & dreaming linter
         ├── document_exporter.py       # Word (.docx) and print-ready PDF generator

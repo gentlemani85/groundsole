@@ -75,14 +75,16 @@ groundsole/
 ├── README_DE.md                       # Deutsche Ausgabe (dieses Dokument)
 ├── version.json                       # Versionierung für dezentrale Updates
 ├── architecture/                      # Architektonische Kern-Prinzipien
-│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # Boden-Test, Kausalität & IST-Stand-Pflicht
-│   ├── 02_MEMORY_HIERARCHY.md         # RAM vs. Langzeitgedächtnis, 3-Ebenen-Ladeordnung
+│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # Die 14 Invarianten, Boden-Test & Local-First AI
+│   ├── 02_MEMORY_HIERARCHY.md         # Klartext-SSOT -> KV -> Vektoren -> Wissensgraph
 │   ├── 03_ROLLOUT_AND_INSTANCES.md    # Entkoppeltes Hub-and-Spoke Modell
-│   └── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB Sharding & Cloud-Sync-Stabilität
+│   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB Sharding & lokale SSD vs. Cloud-Sync
+│   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Stufen-Governance & abgeleitete Views
+│   └── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-neutraler Einstieg & Minimal Core Triad
 ├── templates/                         # Saubere Arbeits-Vorlagen
-│   ├── AGENTS.md                      # Universeller Agenten-Einstiegspunkt
+│   ├── AGENTS.md                      # Universeller Agenten-Einstiegspunkt (Minimal Core Triad)
 │   ├── index.md                       # Primärer Gedächtnis-Index
-│   ├── LOAD_ORDER.md                  # Minimale Session-Ladeordnung
+│   ├── LOAD_ORDER.md                  # Minimale Session-Ladeordnung (Legacy-Fallback)
 │   ├── STYLE_AND_GUARDRAILS.md        # Koprozessor-Tonalität & Kausalitätsprüfung
 │   ├── DYNAMIC_STATE.md               # Lebendiger Tages- und Projektfokus
 │   ├── bootstrap.md                   # Ausführender Master-Bootstrap-Prompt
@@ -93,18 +95,23 @@ groundsole/
 │       └── LEARNING_AND_SKILLS.md     # Fächer, Lehrpläne, Kompetenzaufbau
 ├── skills/                            # Vorkonfigurierte Groundsole-Skills
 │   ├── stream-archive/                # Bereinigt, signiert und friert Chats in Transkripte ein
+│   ├── memory-engine/                 # Autonome Speicherpersistenz & Multi-Tier Retrieval Engine
 │   ├── memory-recall/                 # Föderierte Suche über Vektoren, Graph, Fakten & Text
 │   ├── document-export/               # Exportiert Markdown in Word (.docx) und druckreifes PDF (.pdf)
+│   ├── presentation-deck/             # Autarke interaktive 16:9 HTML-Präsentationen
+│   ├── groundsole-onboarding/         # Kognitives Onboarding & interaktives Tutorial
+│   ├── space-sync/                    # Deterministischer Delta-Abgleich geteilter Team-Spaces
 │   ├── mail-manager/                  # Prüft und versendet E-Mails via IMAP/SMTP (Gmail, Outlook)
 │   ├── system-hygiene/                # Entropie-Senkung, Cache-Bereinigung & Link-Prüfung
 │   └── inbox-triage/                  # Deterministische Verarbeitung von Dateien in Inbox/
 └── tools/                             # Automatisierung & Ausführungs-Engines
     ├── init_instance.py               # Werkzeug zum Stanzen neuer Instanzen
     ├── check_update.py                # Dezentraler GitHub-Update-Checker
-    └── scripts/                       # Die 7 Python-Kern-Engines
+    └── scripts/                       # Die 8 Python-Kern-Engines
         ├── memory.py                  # Key-Value Faktenspeicher mit Cloud-Konflikt-Schutz
         ├── memory_indexer.py          # FastEmbed Jina ONNX Transkript-Vektor-Indexer
         ├── memory_retriever.py        # Multi-DB föderierte semantische Suchmaschine
+        ├── crystallize_memory.py      # Post-Archival Fakten- & Graph-Kristallisation (Gemini Flash Lite)
         ├── knowledge_graph.py         # Zero-API relationaler Wissensgraph (SQLite)
         ├── check_integrity.py         # Zero-Dependency Link-, Modul- & Dreaming-Linter
         ├── document_exporter.py       # Word- (.docx) und PDF-Generator

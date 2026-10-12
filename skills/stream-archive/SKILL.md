@@ -2,7 +2,7 @@
 name: stream-archive
 description: "Automated session transcript archiving, telemetry sanitization, signature generation, and long-term memory crystallization."
 version: 1.0.0
-author: Emanuel Gössler
+author: Groundsole Core Team
 tags: [groundsole, archive, indexing, memory, automation]
 ---
 
@@ -38,11 +38,11 @@ Activate this skill when:
 
 Every session transcript saved to `00_MEMORY/transcripts/` must strictly adhere to these formatting rules:
 
-1. **Heading Hierarchy (H1 vs H2 vs H3):**
+1. **Heading Hierarchy (H1 vs H2 vs H3) & Speaker Identity:**
    - **H1 (`#`)**: Solely the main title at the very top (e.g., `# 2026-09-18 - Groundsole Core Architecture`).
    - **H2 (`##`)**: Solely the speaker headings with timestamps:
-     - `## User (YYYY-MM-DDTHH:MM:SS+02:00)`
-     - `## Antigravity (YYYY-MM-DDTHH:MM:SS+02:00)` (or Claude / Hermes / etc.)
+     - `## User (YYYY-MM-DDTHH:MM:SS+02:00)` (or specified user profile name).
+     - `## Assistant (YYYY-MM-DDTHH:MM:SS+02:00)` (or Claude / Hermes / Antigravity etc.)
    - **H3 (`###`) and below**: All section headings *within* responses.
 
 2. **Telemetry Sanitization & Anti-Noise:**
@@ -52,37 +52,39 @@ Every session transcript saved to `00_MEMORY/transcripts/` must strictly adhere 
 
 3. **Direct H1-to-H2 Transition (No Metadata Header):**
    - Directly after H1, the first speaker H2 **must follow immediately** (`# Title \n\n ## User (...)`).
-   - Do **not** inject metadata lines (`Date:`, `Participants:`, `Status:`) into the transcript. All metadata belongs exclusively in the signature file (`00_MEMORY/summaries/`).
+   - Do **not** inject metadata lines (`Date:`, `Participants:`, `Status:`) into the transcript.
+
+4. **Two-Path Archiving Triage & Zero-Leak Sanitizing:**
+   - **Path A (Standard / Personal & Strategy):**
+     - Applies to general reflections, personal domains, philosophy, overarching strategy.
+     - Transcript: `00_MEMORY/transcripts/YYYY-MM-DD - [Title].md`
+     - Vector Database: Primary active DB shard.
+   - **Path B (Isolated Domain / Operational Work):**
+     - Applies to IT infrastructure, credentials, switches, routers, licenses, operational procedures.
+     - **Check 1 (Privacy & Reflection):** Ensure no personal private notes are mixed in operational logs.
+     - **Check 2 (Zero-Leak Secret Sanitizer):** Replace all passwords, router keys, and secrets with `[IN_SECRET_MANAGER_SAVED]`.
+     - Transcript: `00_MEMORY/transcripts/YYYY-MM-DD - [Domain] - [Title].md`
+     - Vector Database: Dedicated domain shard (isolated from primary personal memory).
 
 ---
 
 ## 📋 Step-by-Step Archival Lifecycle
 
-1. **Inspect & Sanitize:**  
-   Read the raw export, ensure proper H1/H2 formatting, and remove all telemetry junk.
-2. **Save Transcript:**  
-   Write the sanitized file to `00_MEMORY/transcripts/YYYY-MM-DD - [Descriptive_Title].md`.
-3. **Generate Signature Block:**  
-   Create `00_MEMORY/summaries/YYYY-MM-DD - [Descriptive_Title]_signature.md` with:
-   ```markdown
-   # FILE: [filename without extension]
-   DATE: [YYYY-MM-DD]
-   SIZE: [Size in KB]
-   DOMAINS: [Relevant domain clusters, e.g. Architecture, Operations, Strategy]
-   ORGANISM_STATE: [1-2 sentences on state and context at the time of session]
-   CORE_INSIGHTS: [2-3 sentences summarizing genuine breakthroughs and decisions]
-   FIRST_MENTIONS: [New concepts, terms, or entity names introduced here]
-   REFERENCES: [Linked files, external URLs, or entity references]
-   ```
-4. **Update Dynamic State:**  
-   Update `00_MEMORY/DYNAMIC_STATE.md` with current archive counts and operational focus.
-5. **Incremental Vector Ingestion:**  
-   Index the new transcript into the local active database shard (`active.db`).
+1. **Triage & Classification:**
+   Check whether Path A or Path B applies. Perform privacy check for Path B.
+2. **Inspect & Sanitize:**  
+   Read raw export, ensure proper H1/H2 formatting, remove telemetry junk. Replace secrets with `[IN_SECRET_MANAGER_SAVED]`.
+3. **Save Transcript:**  
+   Write sanitized file to `00_MEMORY/transcripts/YYYY-MM-DD - [Descriptive_Title].md`.
+4. **Incremental Vector Ingestion:**  
+   Index new transcript into the appropriate database shard.
+5. **Deterministic State Synchronization & Memory Crystallization:**  
+   Run deterministic memory crystallization and update `DYNAMIC_STATE.md`.
 6. **Mandatory Post-Archiving Quality Control (QC) & Report:**  
-   Immediately and autonomously perform the following verification checklist and present the results in a structured QC report:
-   - **Header Hierarchy:** Verify H1 title immediately followed by H2 first speaker (no metadata in transcript).
-   - **Hygiene:** Confirm total removal of `<CONTEXT_SUMMARY>`, `<USER_REQUEST>`, and raw tool telemetry.
-   - **Signature Integrity:** Verify signature existence and non-zero byte size in `00_MEMORY/summaries/`.
-   - **Vector State:** Confirm embeddings written to active vector shard.
-   - **Dynamic State:** Confirm stats synchronized in `00_MEMORY/DYNAMIC_STATE.md`.
-   - **Git Versioning:** Confirm local repository commit of transcript, signature, and state files.
+   Perform verification checklist and present structured QC report:
+   - **Speaker Integrity:** Verify human speaker headers use valid format.
+   - **Chronology:** Verify session runs chronologically without prepending foreign sessions.
+   - **Header Hierarchy:** Verify H1 title immediately followed by H2 first speaker.
+   - **Hygiene & Sanitization:** Confirm total removal of `<CONTEXT_SUMMARY>`, `<USER_REQUEST>`, raw tool telemetry, and replacement of all secrets.
+   - **Vector Routing:** Confirm embeddings written to target vector shard.
+   - **Dynamic State:** Confirm synchronized stats in `DYNAMIC_STATE.md`.

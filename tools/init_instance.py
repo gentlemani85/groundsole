@@ -127,6 +127,7 @@ def scaffold_instance(target_dir: Path, user_name: str, profile: str):
         "document-export",
         "presentation-deck",
         "groundsole-onboarding",
+        "space-sync",
         "mail-manager",
         "system-hygiene",
         "inbox-triage"

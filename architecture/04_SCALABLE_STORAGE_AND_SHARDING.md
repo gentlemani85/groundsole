@@ -14,6 +14,14 @@ In long-running production environments operating across multiple devices synchr
 1. **Bandwidth Churn:** When a 200 MB+ database file changes by even a single chunk, the entire file must be re-uploaded by the cloud sync daemon.
 2. **File Lock Collisions:** Asynchronous cloud sync clients frequently lock the database file during upload, causing `sqlite3.OperationalError: database is locked`.
 3. **Database Corruption:** Concurrent writes across two unsynchronized laptops result in corrupted database states or "conflicted copy" files.
+4. **Dataless File Eviction & Write-Lock Hangs:** Modern cloud synchronization engines (e.g. macOS iCloud Drive with "Optimize Mac Storage", OneDrive "Files On-Demand") automatically purge local data payloads into dataless APFS/NTFS placeholders. Running live SQLite databases, Python virtual environments, or heavy package caches (`node_modules`) directly on cloud-synced mounts triggers unexpected I/O timeouts, broken symlinks, and fatal corruption.
+
+### The Storage Safety Invariant: Local Live Execution vs. Asynchronous Cloud Snapshots
+- **Prohibition of Live Databases on Cloud Mounts:** Live transactional databases (SQLite, LangMem, Cognee, active vector shards) and virtual environment packages must never reside directly on cloud-synced paths subject to OS eviction or background locking.
+- **Physical Demarcation:** High-frequency read/write operations execute strictly on local SSD storage. Cloud storage is leveraged exclusively for:
+  1. Immutable, sealed read-only archive shards (`archive_*.db`).
+  2. Authoritative plaintext Markdown files (`00_MEMORY/*.md`).
+  3. External, asynchronous backup snapshots (via headless backup scripts, REST APIs, or local cron/launchd daemons).
 
 ---
 

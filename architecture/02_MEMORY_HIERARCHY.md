@@ -27,15 +27,15 @@ In Groundsole, the operational boundary is clear:
 │ • Stripped of telemetry, system XML, and compiler dumps      │
 │ • Authoritative, unchangeable historical truth               │
 └──────────────────────────────┬───────────────────────────────┘
-                               │
-            ┌──────────────────┴──────────────────┐
-            ▼                                     ▼
-┌──────────────────────────────┐    ┌──────────────────────────────┐
-│ 3. Dense Signatures          │    │ 4. Long-Term Retrieval       │
-│ • 00_MEMORY/summaries/       │    │ • Semantic Vector Shards     │
-│ • Fast topological routing   │    │ • Knowledge Graph Relations  │
-│ • First mentions & clusters  │    │ • Cross-year semantic search │
-└──────────────────────────────┘    └──────────────────────────────┘
+                                │
+                                ▼
+                ┌──────────────────────────────┐
+                │ 3. Long-Term Retrieval       │
+                │ • Semantic Vector Shards     │
+                │ • Key-Value Facts (LangMem)  │
+                │ • Knowledge Graph Relations  │
+                │ • Cross-year semantic search │
+                └──────────────────────────────┘
 ```
 
 > [!IMPORTANT]
@@ -50,7 +50,7 @@ In Groundsole, the operational boundary is clear:
 To avoid "Lost in the Middle" degradation and ballooning token consumption, Groundsole divides files into three access tiers:
 
 1. **Layer 1: Active Runtime Core (Minimal Session Start)**  
-   - `00_MEMORY/index.md` (authoritative index & source priorities)
+   - `AGENTS.md` (root anchor & entry pointer)
    - `00_MEMORY/STYLE_AND_GUARDRAILS.md` (peer coprocessor tone & causality test)
    - `00_MEMORY/DYNAMIC_STATE.md` (immediate focus, active blockers, open tasks)  
    *-> Loaded silently upon every session initialization.*
@@ -62,10 +62,10 @@ To avoid "Lost in the Middle" degradation and ballooning token consumption, Grou
    - `00_MEMORY/modules/LEARNING_AND_SKILLS.md`  
    *-> Loaded ONLY when the user's inquiry explicitly touches that domain.*
 
-3. **Layer 3: Immutable Archive & Secondary Indices**  
+3. **Layer 3: Immutable Archive & Deterministic Retrieval**  
    - `00_MEMORY/transcripts/*.md` (raw primary dialogues)
-   - `00_MEMORY/summaries/*.md` (routing signatures)  
-   *-> Queried on demand via semantic vector search or ripgrep.*
+   - `00_MEMORY/vectors/*.db` & `00_MEMORY/langmem_store.db` (semantic & key-value facts)  
+   *-> Queried on demand via semantic vector search or memory_retriever.py.*
 
 ---
 
@@ -105,12 +105,12 @@ Groundsole prevents context rot and database contamination through strict physic
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Causal State & Fact Extraction Protocol (LangMem)
-Facts, parameters, and binding decisions do not wait for vector consolidation. At the end of every dialog turn, the coprocessor autonomously checks if a durable fact was established:
-- **Decisions & Directional Shifts:** Tool choices, approved roadmaps, canceled plans.
-- **Counterpart & Project Facts:** Quotes, commitments, deadlines, rates.
-- **Infrastructure & Numerical State:** Measured values, consumption, hardware specs.
-- **Universal Catch-All:** Any information whose absence in future sessions would cause friction, repetition, or false assumptions.
+### Causal State & Fact Extraction Protocol (Post-Archival Crystallization)
+Facts, parameters, and binding decisions are not extracted randomly during active conversation. Following **Principle 14 (Deterministic Downstream)**, fact and graph crystallization is strictly tied to the archiving event:
+- **Decoupled from Chat Loop:** The agent does not run background extraction prompts during active dialogue turns. This preserves working memory and prevents context fragmentation.
+- **Post-Archival Processing (`crystallize_memory.py`):** When a session transcript is finalized and indexed, an isolated downstream processor analyses the cohesive conversation context.
+- **Strict Signal-Over-Noise Filter:** Extraction enforces a hard ceiling of **1 to 3 fundamental breakthrough facts or binding decisions** per session. Incremental code edits, trivial chatter, or styling adjustments yield empty results.
+- **Deterministic Key Consolidation:** Extracted facts are strictly mapped to normalized namespaces (`ERKENNTNIS`, `ENTSCHEIDUNG`, `PRINZIP`, `SYSTEM`), continuously overwriting previous states rather than accumulating duplicate fragments.
 
 ---
 

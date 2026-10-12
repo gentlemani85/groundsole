@@ -111,6 +111,26 @@ Groundsole is rooted in the **Local-First AI Manifesto**:
 * **Asset Building Over Subscription Renting:** Organizations and individuals build permanent, 100% owned digital assets (knowledge graph, vector shards, workflow skills) rather than renting closed SaaS portals.
 * **Zero Vendor Lock-in & Privacy by Architecture:** Privacy and GDPR compliance are guaranteed by local client-side execution rather than corporate policy promises.
 
+---
+
+## 14. Kausalkette „Unten anhängen“ (Stochastic Upstream vs. Deterministic Downstream)
+
+Ein foundationaler Konstruktionsfehler konventioneller Agenten-Architekturen ist der Versuch, deterministische Abläufe „oben“ im Prompt, im System-Prompt oder in riesigen Regelwerken (`STYLE_AND_GUARDRAILS`) durch stochastische Verhaltensvorschriften zu erzwingen (*„Wenn du Schritt A machst, musst du danach unbedingt Schritt B machen und Tool C aufrufen“*).
+
+Groundsole etabliert hier eine strikte architektonische Trennung entlang der kanonischen Ausführungsgrenze:
+
+* **Stochastic Upstream (Der Zündschlüssel):**
+  Das Sprachmodell (LLM) dient ausschließlich als stochastischer Initiator für Absicht, Intent-Erkennung, kreative Synthese und Richtungsentscheidungen. Es erhält als Werkzeug lediglich den Zündschlüssel (ein atomares Einstiegs-Skript). Der Prompt bleibt federleicht, unüberlastet und maximal fokussiert.
+* **Canonical Execution Boundary:**
+  Die Ausführungsgrenze liegt dort, wo die stochastische Absicht in ein konkretes Betriebssystem-Skript übergeben wird. Ab diesem Punkt ist der stochastische Modellprozess entkoppelt.
+* **Deterministic Downstream (Die unerbittliche Kaskade):**
+  Alles, was zwingend als logische, kausale Konsequenz einer Aktion folgen **muss** (Validierung, Vektorisierung, Qualitätskontrolle, Metadaten-Updates, Bereinigung oder die Kristallisierung von Fakten in LangMem und Cognee), wird **physisch „unten“ an das Skript auf Betriebssystem-Ebene angehängt**.
+* **Die architektonische Konsequenz:**
+  1. **Zero Context Drift & Zero Token-Kaskade:** Das System verschwendet keine Tokens mehr dafür, der KI bei jedem Turn Handlungsanweisungen einzutrichtern.
+  2. **100 % deterministische Ausführungsgarantie:** Einmal gezündet, kann die Kette nicht mehr durch Modell-Halluzinationen, Kontext-Kompaktierung oder Token-Limits abreißen.
+  3. **Verstärkung der kognitiven Fokussierung:** Weil das Modell nicht mehr die Bürokratie der Folgeprozesse im Kopf behalten muss, steht das gesamte Aufmerksamkeitsfenster ungeteilt für das eigentliche inhaltliche Denken zur Verfügung.
+
+
 
 
 

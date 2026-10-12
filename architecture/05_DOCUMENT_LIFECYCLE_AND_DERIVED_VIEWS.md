@@ -55,8 +55,8 @@ title: System Architecture & Security Audit
 tier: 2
 version: 1.2
 status: in_review       # draft | in_review | approved
-author: Emanuel Gössler
-reviewed_by: Emanuel Gössler
+author: Lead Architect
+reviewed_by: Lead Auditor
 reviewed_at: 2026-09-22 15:00
 ---
 ```
