@@ -75,13 +75,14 @@ groundsole/
 ├── README_DE.md                       # German edition
 ├── version.json                       # Upstream release tracking
 ├── architecture/                      # Foundational architectural principles
-│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # The 14 Invariants, Ground test & Local-First AI
-│   ├── 02_MEMORY_HIERARCHY.md         # Plaintext SSOT -> KV -> Vector -> Knowledge Graph
+│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # The 16 Invariants, Ground test & Local-First AI
+│   ├── 02_MEMORY_HIERARCHY.md         # Plaintext SSOT -> KV -> Vector -> Knowledge Graph -> Dreaming
 │   ├── 03_ROLLOUT_AND_INSTANCES.md    # Decoupled Hub-and-Spoke model
 │   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB sharding & local SSD vs. cloud sync
 │   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Tier Document Governance & Derived Views
 │   ├── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-Neutral Entry Point & The Minimal Core Triad
-│   └── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Two-Tier Federation & Brownfield Ingestion
+│   ├── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Two-Tier Federation & Brownfield Ingestion
+│   └── 08_CONTEXT_FILTERING_AND_DREAMING_CONSOLIDATION.md # Zero-Spill Context-Filter MCP & Deep Dreaming
 ├── templates/                         # Clean boilerplate templates
 │   ├── AGENTS.md                      # Universal agent entry point (Minimal Core Triad)
 │   ├── index.md                       # Authoritative memory index
@@ -98,7 +99,7 @@ groundsole/
 │       └── LEARNING_AND_SKILLS.md     # Academic curricula & skill mastery
 ├── skills/                            # Pre-configured Groundsole skills
 │   ├── stream-archive/                # Sanitizes, signs, and freezes sessions into transcripts
-│   ├── memory-engine/                 # Autonomous memory persist & multi-tier retrieval engine
+│   ├── memory-engine/                 # Autonomous memory persist, retrieval & dreaming engine
 │   ├── memory-recall/                 # Unified search across vectors, graph, facts & plaintext
 │   ├── document-export/               # Exports Markdown to Word (.docx) and A4 PDF (.pdf)
 │   ├── presentation-deck/             # Self-contained 16:9 interactive HTML presentations
@@ -111,28 +112,32 @@ groundsole/
     ├── init_instance.py               # Instance generator tool
     ├── check_update.py                # Decentralized upstream update checker
     └── scripts/                       # Core Python Utility & Memory Engines
-        ├── memory.py                  # Key-value fact store with cloud conflict resolution
+        ├── memory.py                  # Key-value fact store with cloud conflict resolution & gatekeeping
         ├── memory_indexer.py          # FastEmbed Jina ONNX transcript vector indexer
         ├── memory_retriever.py        # Multi-DB federated semantic search engine
         ├── crystallize_memory.py      # Post-archival fact & graph crystallizer (Gemini Flash Lite)
+        ├── dreaming.py                # Deep Dreaming biophysical memory consolidation & decay
+        ├── context_filter_mcp.py      # Zero-spill terminal & web MCP proxy with SQLite FTS5
         ├── export_hermes_session.py   # Lossless zero-token Hermes session exporter (SQLite)
         ├── export_antigravity_session.py # Zero-token Antigravity session exporter (JSONL)
         ├── knowledge_graph.py         # Zero-API relational knowledge graph (SQLite)
-        ├── check_integrity.py         # Zero-dependency link, module & dreaming linter
+        ├── check_integrity.py         # Zero-dependency link, module & integrity linter
         ├── document_exporter.py       # Word (.docx) and print-ready PDF generator
         └── mail_helper.py             # Zero-dependency IMAP/SMTP email assistant
 ```
 
 ---
 
-## 3. The 4-Tier Memory Architecture
+## 3. The 5-Tier Memory & Context Architecture
 
-Groundsole models persistent cognition across four complementary layers:
+Groundsole models persistent cognition across five complementary layers:
 
 1. **Plaintext Markdown SSOT (`00_MEMORY/`):** Human-readable, Git-versioned state.
-2. **Key-Value Fact Store (`memory.py`):** Lightning-fast personal facts and preferences with automatic cloud-sync conflict resolution.
+2. **Key-Value Fact Store (`memory.py`):** Lightning-fast personal facts with automatic cloud-sync conflict resolution and status gatekeeping.
 3. **Semantic Vector Shards (`memory_indexer.py` & `memory_retriever.py`):** FastEmbed neural embeddings (`jinaai/jina-embeddings-v2-base-de`) partitioned into sealed historical archives and active shards.
 4. **Relational Knowledge Graph (`knowledge_graph.py`):** Zero-API entity topology mapping relationships without cloud lock-in.
+5. **Biophysical Dreaming & Context Buffering (`dreaming.py` & `context_filter_mcp.py`):** Offline memory consolidation (temporal decay, semantic dispute resolution) and zero-spill MCP context protection.
+
 
 ---
 

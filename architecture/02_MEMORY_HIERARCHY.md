@@ -129,4 +129,14 @@ Buffer indexing never requires manual intervention:
 - **Just-In-Time (JIT) Retriever Sync:** Before executing any search query, `memory_retriever.py` checks active harness logs for new turns. Unchanged sessions evaluate in ~0.02s; new turns are vectorized incrementally in 1–3s before returning search results.
 - **Digital Hygiene & Thought Clearance:** Compaction warnings are treated calmly. Since all data is preserved in Tier 1, archiving via `stream-archive` is conducted deliberately as a hygiene step when a cohesive milestone is completed, resetting working memory for maximum model precision.
 
+---
+
+## 6. Dormant Memory Consolidation & Gatekeeping (Groundsole Dreaming)
+
+To prevent cognitive entropy, stale deadlines, and contradictory decisions from accumulating across historical tiers:
+- **Dormant Consolidation (`dreaming.py`):** Runs offline to evaluate temporal decay, compute dense semantic clusters via local FastEmbed, and resolve contradictions with sub-cent LLM verification.
+- **Safe Non-Destructive Gatekeeping (`memory.py`):** Deprecated and expired records are marked with `[STATUS: DEPRECATED]` or `[STATUS: EXPIRED]` and filtered automatically from standard search/list queries, maintaining high-precision recall while guaranteeing an immutable audit trail.
+*(-> Full architecture in [08_CONTEXT_FILTERING_AND_DREAMING_CONSOLIDATION.md](08_CONTEXT_FILTERING_AND_DREAMING_CONSOLIDATION.md))*
+
+
 

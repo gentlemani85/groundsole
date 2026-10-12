@@ -130,6 +130,33 @@ Groundsole etabliert hier eine strikte architektonische Trennung entlang der kan
   2. **100 % deterministische Ausführungsgarantie:** Einmal gezündet, kann die Kette nicht mehr durch Modell-Halluzinationen, Kontext-Kompaktierung oder Token-Limits abreißen.
   3. **Verstärkung der kognitiven Fokussierung:** Weil das Modell nicht mehr die Bürokratie der Folgeprozesse im Kopf behalten muss, steht das gesamte Aufmerksamkeitsfenster ungeteilt für das eigentliche inhaltliche Denken zur Verfügung.
 
+---
+
+## 15. Biophysikalische Gedächtniskonsolidierung („Das Dreaming-Prinzip“)
+
+Aktive Arbeits-Sessions akkumulieren unvermeidlich kognitive Entropie: temporäre Zwischenentscheidungen, später revidierte Annahmen, verfallene Fristen und semantische Redundanzen. Konventionelle Agenten versuchen entweder, das Gedächtnis im laufenden Dialog krampfhaft sauber zu halten (was den Nutzer stört und Tokens verbrennt), oder lassen es ungefiltert verrotten, bis Widersprüche die Inferenz lähmen.
+
+Groundsole löst dies analog zur biophysikalischen Funktionsweise biologischer Organismen (Schlaf und Traumphasen):
+* **Trennung von Wach-Erfassung und Ruhe-Konsolidierung:** Während des operativen Wachzustands werden Fakten schnell und ungefiltert erfasst. Die Bereinigung und Verdichtung erfolgt offline und autonom in einem dedizierten Ruhezyklus (*Groundsole Dreaming*).
+* **Zeitlicher Verfall (Temporal Decay):** Fristen, Termine und situative Notizen, deren Gültigkeit in der Vergangenheit liegt, werden deterministisch erkannt und als `[STATUS: EXPIRED]` markiert.
+* **FastEmbed Vektor-Clustering:** Lokale neuronale Embeddings spüren thematische Überlappungen und semantische Cluster über Kategoriengrenzen hinweg auf – in Millisekunden und ohne API-Kosten.
+* **Widerspruchs- & Redundanz-Audit:** Ein isoliertes, kostengünstiges Modell validiert Kandidatenpaare:
+  - *Widerspruch/Ablösung:* Ältere, überholte Entscheidungen werden als `[STATUS: DEPRECATED | Abgelöst]` markiert.
+  - *Redundanz-Kompression:* Nahezu identische Doppelerfassungen werden zu einem autoritativen Faktum synthetisiert.
+* **Idempotentes Caching & Gatekeeping:** Geprüfte Faktenpaare werden dauerhaft gecached (Null wiederholte Prüfkosten). Das operative Abfrage-Interface (`memory.py search/list`) blendet entwertete und abgelaufene Einträge standardmäßig aus, bewahrt sie jedoch als unzerstörbaren Audit-Trail.
+
+---
+
+## 16. Deterministische Kontext-Pufferung („Context-Filter Proxy“)
+
+Das Kontextfenster eines LLM ist die teuerste und anfälligste Ressource des gesamten Systems. Das unkontrollierte Hereinströmen roher Terminal-Ausgaben, Compiler-Warnungen, Test-Runner-Logs oder massiver HTML-Seiten führt zu drastischer Kontext-Kontamination (Context Contamination), verdrängt frühere Systeminstruktionen und treibt die Latenz und Kosten in die Höhe.
+
+Groundsole etabliert den **Context-Filter Proxy** als standardisierten MCP-Server:
+* **Headless-Pufferung via SQLite FTS5:** Shell-Befehle und Webabrufe werden nicht blind in den Chat gespült, sondern in einem ephemeren lokalen Cache abgefangen und volltextindiziert.
+* **Signal-Extraktion statt Datenmüll:** Das Modell erhält ausschließlich kondensierte Signale (Exit-Code, Fehlermeldungen, Stacktraces oder präzise Head/Tail-Vorschauen) samt kompakter Cache-ID.
+* **On-Demand-Chirurgie:** Benötigt das Modell für eine Fehlerbehebung tieferen Kontext, fordert es über gezielte Werkzeuge (`ctx_inspect_lines`, `ctx_search_output`) millimetergenaue Zeilenbereiche an.
+
+
 
 
 

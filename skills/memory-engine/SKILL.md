@@ -1,16 +1,18 @@
 ---
 name: memory-engine
-description: "Unified cognitive memory engine for Groundsole — governs autonomous fact/decision persistence and multi-tier semantic retrieval across all harnesses."
-version: 1.1.0
+description: "Unified cognitive memory engine for Groundsole — governs autonomous fact/decision persistence, multi-tier semantic retrieval, and deep dreaming consolidation across all harnesses."
+version: 1.2.0
 author: Emanuel Gössler
-tags: [groundsole, memory, recall, storage, vectors, graph, langmem, harness-agnostic]
+tags: [groundsole, memory, recall, storage, vectors, graph, langmem, dreaming, harness-agnostic]
 ---
 
 # Groundsole Memory Engine Skill
 
-This skill provides a unified, harness-agnostic interface for cognitive memory operations across any LLM agent environment (Antigravity, Hermes, Claude Code, Cursor, Codex, etc.). It operates as a dual-action engine:
+This skill provides a unified, harness-agnostic interface for cognitive memory operations across any LLM agent environment (Antigravity, Hermes, Claude Code, Cursor, Codex, etc.). It operates as a tripartite engine:
 1. **Autonomous Persistence (Writing):** Captures state shifts, facts, and decisions at the conclusion of relevant dialogue turns.
-2. **Cascaded Retrieval (Reading):** Searches across plaintext modules, structured fact tables, relational graphs, and vector databases.
+2. **Cascaded Retrieval (Reading):** Searches across plaintext modules, structured fact tables, relational graphs, and vector databases with safe gatekeeping.
+3. **Biophysical Dreaming (Consolidation):** Periodically runs dormant consolidation to purge expired dates, resolve contradictions, and compress redundancies.
+
 
 ---
 
@@ -85,3 +87,28 @@ python3 scripts/memory_retriever.py --query "<query>" --top_k 5
 - **Harness Detection:** The engine detects whether it is executed within Antigravity, Hermes, Claude, or standalone terminal and uses the standard local virtual environment (`$HOME/.local/venv`).
 - **Idempotency:** Re-indexing or re-archiving conversations never produces duplicate vector records (`INSERT OR IGNORE INTO chunks`).
 - **Digital Hygiene:** Ephemeral conversational state is buffered in `memory_buffer.db`, while verified, finished dialogues are curated in `memory_active.db`.
+
+---
+
+## Part 4: Dormant Consolidation Protocol (Groundsole Dreaming)
+
+To maintain long-term signal coherence and prevent outdated facts or contradictions from confusing retrieval:
+
+### 1. Dry-Run Inspection
+Scan for temporal decay, semantic clusters, and potential contradictions without modifying records:
+```bash
+python3 scripts/dreaming.py --dry-run
+```
+
+### 2. Full Consolidation Cycle
+Run biophysical consolidation, marking superseded records as `[STATUS: DEPRECATED]`, expired dates as `[STATUS: EXPIRED]`, and syncing topological graphs:
+```bash
+python3 scripts/dreaming.py --apply
+```
+
+### 3. Safe Gatekeeping
+Standard queries (`memory.py search`, `memory.py list`) hide deprecated records by default. To inspect the full historical audit trail:
+```bash
+python3 scripts/memory.py search "<query>" --all
+```
+

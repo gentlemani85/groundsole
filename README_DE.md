@@ -75,13 +75,14 @@ groundsole/
 ├── README_DE.md                       # Deutsche Ausgabe (dieses Dokument)
 ├── version.json                       # Versionierung für dezentrale Updates
 ├── architecture/                      # Architektonische Kern-Prinzipien
-│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # Die 14 Invarianten, Boden-Test & Local-First AI
-│   ├── 02_MEMORY_HIERARCHY.md         # Klartext-SSOT -> KV -> Vektoren -> Wissensgraph
+│   ├── 01_CORE_PRINCIPLES_AND_SSOT.md # Die 16 Invarianten, Boden-Test & Local-First AI
+│   ├── 02_MEMORY_HIERARCHY.md         # Klartext-SSOT -> KV -> Vektoren -> Wissensgraph -> Dreaming
 │   ├── 03_ROLLOUT_AND_INSTANCES.md    # Entkoppeltes Hub-and-Spoke Modell
 │   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB Sharding & lokale SSD vs. Cloud-Sync
 │   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Stufen-Governance & abgeleitete Views
 │   ├── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-neutraler Einstieg & Minimal Core Triad
-│   └── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Zwei-Ebenen-Föderation & Brownfield-Adoption
+│   ├── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Zwei-Ebenen-Föderation & Brownfield-Adoption
+│   └── 08_CONTEXT_FILTERING_AND_DREAMING_CONSOLIDATION.md # Zero-Spill Context-Filter & Deep Dreaming Engine
 ├── templates/                         # Saubere Arbeits-Vorlagen
 │   ├── AGENTS.md                      # Universeller Agenten-Einstiegspunkt (Minimal Core Triad)
 │   ├── index.md                       # Primärer Gedächtnis-Index
@@ -98,7 +99,7 @@ groundsole/
 │       └── LEARNING_AND_SKILLS.md     # Fächer, Lehrpläne, Kompetenzaufbau
 ├── skills/                            # Vorkonfigurierte Groundsole-Skills
 │   ├── stream-archive/                # Bereinigt, signiert und friert Chats in Transkripte ein
-│   ├── memory-engine/                 # Autonome Speicherpersistenz & Multi-Tier Retrieval Engine
+│   ├── memory-engine/                 # Autonome Speicherpersistenz, Retrieval & Dreaming Engine
 │   ├── memory-recall/                 # Föderierte Suche über Vektoren, Graph, Fakten & Text
 │   ├── document-export/               # Exportiert Markdown in Word (.docx) und druckreifes PDF (.pdf)
 │   ├── presentation-deck/             # Autarke interaktive 16:9 HTML-Präsentationen
@@ -110,29 +111,33 @@ groundsole/
 └── tools/                             # Automatisierung & Ausführungs-Engines
     ├── init_instance.py               # Werkzeug zum Stanzen neuer Instanzen
     ├── check_update.py                # Dezentraler GitHub-Update-Checker
-    └── scripts/                       # Die 10 Python-Kern-Engines
-        ├── memory.py                  # Key-Value Faktenspeicher mit Cloud-Konflikt-Schutz
+    └── scripts/                       # Die Python-Kern-Engines
+        ├── memory.py                  # Key-Value Faktenspeicher mit Cloud-Konflikt-Schutz & Gatekeeping
         ├── memory_indexer.py          # FastEmbed Jina ONNX Transkript-Vektor-Indexer
         ├── memory_retriever.py        # Multi-DB föderierte semantische Suchmaschine
         ├── crystallize_memory.py      # Post-Archival Fakten- & Graph-Kristallisation (Gemini Flash Lite)
+        ├── dreaming.py                # Deep Dreaming biophysikalische Gedächtniskonsolidierung & Verfall
+        ├── context_filter_mcp.py      # Zero-Spill Terminal & Web MCP-Proxy mit SQLite FTS5
         ├── export_hermes_session.py   # Verlustfreier Zero-Token Hermes-Session-Exporter (SQLite)
         ├── export_antigravity_session.py # Zero-Token Antigravity-Session-Exporter (JSONL)
         ├── knowledge_graph.py         # Zero-API relationaler Wissensgraph (SQLite)
-        ├── check_integrity.py         # Zero-Dependency Link-, Modul- & Dreaming-Linter
+        ├── check_integrity.py         # Zero-Dependency Link-, Modul- & Konsistenz-Linter
         ├── document_exporter.py       # Word- (.docx) und PDF-Generator
         └── mail_helper.py             # E-Mail-Assistent für Gmail & IMAP/SMTP
 ```
 
 ---
 
-## 3. Die 4-Stufen-Gedächtnis-Architektur
+## 3. Die 5-Stufen-Gedächtnis- & Kontext-Architektur
 
-Groundsole modelliert Gedächtnis über vier komplementäre Schichten:
+Groundsole modelliert Gedächtnis über fünf komplementäre Schichten:
 
 1. **Klartext-Markdown SSOT (`00_MEMORY/`):** Lesbarer, Git-versionierter Wahrheitsstand.
-2. **Key-Value Faktenspeicher (`memory.py`):** Blitzschnelle persönliche Fakten mit Cloud-Konflikt-Auflösung.
+2. **Key-Value Faktenspeicher (`memory.py`):** Blitzschnelle persönliche Fakten mit Cloud-Konflikt-Auflösung und Status-Gatekeeping.
 3. **Semantische Vektor-Shards (`memory_indexer.py` & `memory_retriever.py`):** FastEmbed Embeddings (`jinaai/jina-embeddings-v2-base-de`), aufgeteilt in versiegelte Epochen und aktive Arbeitsdatenbanken.
 4. **Relationaler Wissensgraph (`knowledge_graph.py`):** Zero-API Entitäten-Topologie ohne Cloud-Zwang.
+5. **Biophysikalisches Dreaming & Kontext-Pufferung (`dreaming.py` & `context_filter_mcp.py`):** Autonome Gedächtniskonsolidierung im Ruhezustand (zeitlicher Verfall, semantisches Widerspruchs-Audit) und Zero-Spill MCP-Kontextschutz.
+
 
 ---
 

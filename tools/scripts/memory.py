@@ -112,17 +112,18 @@ def add_memory(namespace, key, content):
     conn.close()
     print(f"✅ Memory stored: [{namespace}] {key}")
 
-def search_memory(query):
+def search_memory(query, include_deprecated=False):
     check_and_resolve_conflicts()
     if not os.path.exists(DB_PATH):
         print("ℹ️ No memory database found yet.")
         return
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    sql = """
+    dep_filter = "" if include_deprecated else "AND content NOT LIKE '[STATUS: DEPRECATED%' AND content NOT LIKE '[STATUS: EXPIRED%'"
+    sql = f"""
         SELECT id, timestamp, namespace, key, content
         FROM memories
-        WHERE namespace LIKE ? OR key LIKE ? OR content LIKE ?
+        WHERE (namespace LIKE ? OR key LIKE ? OR content LIKE ?) {dep_filter}
         ORDER BY id DESC
     """
     pattern = f"%{query}%"
@@ -137,17 +138,21 @@ def search_memory(query):
     for r in rows:
         print(f"• [ID: {r[0]} | {r[1][:10]} | {r[2]}] {r[3]}: {r[4]}")
 
-def list_memories(namespace=None):
+def list_memories(namespace=None, include_deprecated=False):
     check_and_resolve_conflicts()
     if not os.path.exists(DB_PATH):
         print("ℹ️ No memory database found yet.")
         return
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    dep_filter = "" if include_deprecated else "AND content NOT LIKE '[STATUS: DEPRECATED%' AND content NOT LIKE '[STATUS: EXPIRED%'"
     if namespace:
-        rows = cursor.execute("SELECT id, timestamp, namespace, key, content FROM memories WHERE namespace=? ORDER BY id DESC", (namespace,)).fetchall()
+        sql = f"SELECT id, timestamp, namespace, key, content FROM memories WHERE namespace=? {dep_filter} ORDER BY id DESC"
+        rows = cursor.execute(sql, (namespace,)).fetchall()
     else:
-        rows = cursor.execute("SELECT id, timestamp, namespace, key, content FROM memories ORDER BY namespace, key").fetchall()
+        where_clause = "" if include_deprecated else "WHERE content NOT LIKE '[STATUS: DEPRECATED%' AND content NOT LIKE '[STATUS: EXPIRED%'"
+        sql = f"SELECT id, timestamp, namespace, key, content FROM memories {where_clause} ORDER BY namespace, key"
+        rows = cursor.execute(sql).fetchall()
     conn.close()
 
     for r in rows:
@@ -155,19 +160,23 @@ def list_memories(namespace=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: memory.py add <namespace> <key> <content> | search <query> | list [namespace]")
+        print("Usage: memory.py add <namespace> <key> <content> | search <query> [--all] | list [namespace] [--all]")
         sys.exit(1)
 
     cmd = sys.argv[1].lower()
-    if cmd == "add" and len(sys.argv) >= 5:
-        add_memory(sys.argv[2], sys.argv[3], " ".join(sys.argv[4:]))
-    elif cmd == "search" and len(sys.argv) >= 3:
-        search_memory(" ".join(sys.argv[2:]))
+    include_dep = "--all" in sys.argv or "--include-deprecated" in sys.argv
+    clean_args = [a for a in sys.argv if a not in ("--all", "--include-deprecated")]
+
+    if cmd == "add" and len(clean_args) >= 5:
+        add_memory(clean_args[2], clean_args[3], " ".join(clean_args[4:]))
+    elif cmd == "search" and len(clean_args) >= 3:
+        search_memory(" ".join(clean_args[2:]), include_deprecated=include_dep)
     elif cmd == "list":
-        ns = sys.argv[2] if len(sys.argv) >= 3 else None
-        list_memories(ns)
+        ns = clean_args[2] if len(clean_args) >= 3 else None
+        list_memories(ns, include_deprecated=include_dep)
     else:
-        print("Invalid arguments. Use: add, search, list")
+        print("Invalid arguments. Use: add, search, list [--all]")
 
 if __name__ == "__main__":
     main()
+
