@@ -107,11 +107,13 @@ groundsole/
 └── tools/                             # Automatisierung & Ausführungs-Engines
     ├── init_instance.py               # Werkzeug zum Stanzen neuer Instanzen
     ├── check_update.py                # Dezentraler GitHub-Update-Checker
-    └── scripts/                       # Die 8 Python-Kern-Engines
+    └── scripts/                       # Die 10 Python-Kern-Engines
         ├── memory.py                  # Key-Value Faktenspeicher mit Cloud-Konflikt-Schutz
         ├── memory_indexer.py          # FastEmbed Jina ONNX Transkript-Vektor-Indexer
         ├── memory_retriever.py        # Multi-DB föderierte semantische Suchmaschine
         ├── crystallize_memory.py      # Post-Archival Fakten- & Graph-Kristallisation (Gemini Flash Lite)
+        ├── export_hermes_session.py   # Verlustfreier Zero-Token Hermes-Session-Exporter (SQLite)
+        ├── export_antigravity_session.py # Zero-Token Antigravity-Session-Exporter (JSONL)
         ├── knowledge_graph.py         # Zero-API relationaler Wissensgraph (SQLite)
         ├── check_integrity.py         # Zero-Dependency Link-, Modul- & Dreaming-Linter
         ├── document_exporter.py       # Word- (.docx) und PDF-Generator

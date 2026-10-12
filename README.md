@@ -112,6 +112,8 @@ groundsole/
         ├── memory_indexer.py          # FastEmbed Jina ONNX transcript vector indexer
         ├── memory_retriever.py        # Multi-DB federated semantic search engine
         ├── crystallize_memory.py      # Post-archival fact & graph crystallizer (Gemini Flash Lite)
+        ├── export_hermes_session.py   # Lossless zero-token Hermes session exporter (SQLite)
+        ├── export_antigravity_session.py # Zero-token Antigravity session exporter (JSONL)
         ├── knowledge_graph.py         # Zero-API relational knowledge graph (SQLite)
         ├── check_integrity.py         # Zero-dependency link, module & dreaming linter
         ├── document_exporter.py       # Word (.docx) and print-ready PDF generator
