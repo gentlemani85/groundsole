@@ -170,6 +170,64 @@ def export_session(
     print(f"   Statistik:  {len(rows)} Turns, {line_count} Zeilen, {byte_count:,} Bytes")
     return output_path
 
+def export_all_sessions(force: bool = False, user_speaker: str = "User") -> int:
+    """Exportiert alle in state.db vorhandenen Sessions nach 00_MEMORY/transcripts/ (Brownfield-Export)."""
+    db_path = os.path.expanduser("~/.hermes/state.db")
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"Hermes state.db nicht gefunden unter {db_path}")
+
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=10)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, started_at, last_activity_at, title
+        FROM sessions
+        WHERE COALESCE(archived, 0) = 0
+        ORDER BY started_at ASC
+    """)
+    sessions = cursor.fetchall()
+
+    if not sessions:
+        print("ℹ️ Keine Sessions in state.db gefunden.")
+        return 0
+
+    repo_root = find_workspace_root()
+    transcripts_dir = os.path.join(repo_root, "00_MEMORY", "transcripts")
+    os.makedirs(transcripts_dir, exist_ok=True)
+    existing_files = os.listdir(transcripts_dir)
+
+    print(f"📦 Starte Brownfield-Batch-Export für {len(sessions)} Hermes-Sessions...")
+    exported_count = 0
+
+    for sess_id, started_at, last_activity, title in sessions:
+        start_dt = datetime.fromtimestamp(started_at, tz=LOCAL_TZ)
+        date_prefix = start_dt.strftime("%Y-%m-%d")
+        final_title = clean_title(title or f"Session_{sess_id}")
+        expected_filename = f"{date_prefix} - {final_title}.md"
+
+        # Prüfe, ob Transkript bereits existiert
+        already_exists = any(
+            f == expected_filename or f.startswith(f"{date_prefix} - {final_title}")
+            for f in existing_files
+        )
+
+        if already_exists and not force:
+            continue
+
+        try:
+            res = export_session(
+                session_id=sess_id,
+                custom_title=final_title,
+                force=force,
+                user_speaker=user_speaker
+            )
+            if res:
+                exported_count += 1
+        except Exception as e:
+            print(f"⚠️ Fehler beim Export von Session {sess_id}: {e}", file=sys.stderr)
+
+    print(f"🎉 Batch-Export abgeschlossen: {exported_count} neue Transkripte nach {transcripts_dir} exportiert.")
+    return exported_count
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Exportiert Hermes Session nach 00_MEMORY/transcripts/")
     parser.add_argument("--session-id", help="Spezifische Hermes Session-ID")
@@ -177,12 +235,16 @@ if __name__ == "__main__":
     parser.add_argument("--output", help="Individueller Ausgabepfad")
     parser.add_argument("--speaker", default="User", help="Name des menschlichen Nutzers (Standard: User)")
     parser.add_argument("--force", action="store_true", help="Vorhandene Datei überschreiben")
+    parser.add_argument("--all", action="store_true", help="Exportiert alle historischen Sessions aus state.db (Batch / Brownfield Adoption)")
     args = parser.parse_args()
 
-    export_session(
-        session_id=args.session_id,
-        custom_title=args.title,
-        output_path=args.output,
-        force=args.force,
-        user_speaker=args.speaker
-    )
+    if args.all:
+        export_all_sessions(force=args.force, user_speaker=args.speaker)
+    else:
+        export_session(
+            session_id=args.session_id,
+            custom_title=args.title,
+            output_path=args.output,
+            force=args.force,
+            user_speaker=args.speaker
+        )

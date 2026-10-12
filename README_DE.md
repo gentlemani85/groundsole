@@ -80,7 +80,8 @@ groundsole/
 │   ├── 03_ROLLOUT_AND_INSTANCES.md    # Entkoppeltes Hub-and-Spoke Modell
 │   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB Sharding & lokale SSD vs. Cloud-Sync
 │   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Stufen-Governance & abgeleitete Views
-│   └── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-neutraler Einstieg & Minimal Core Triad
+│   ├── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-neutraler Einstieg & Minimal Core Triad
+│   └── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Zwei-Ebenen-Föderation & Brownfield-Adoption
 ├── templates/                         # Saubere Arbeits-Vorlagen
 │   ├── AGENTS.md                      # Universeller Agenten-Einstiegspunkt (Minimal Core Triad)
 │   ├── index.md                       # Primärer Gedächtnis-Index
@@ -88,6 +89,8 @@ groundsole/
 │   ├── STYLE_AND_GUARDRAILS.md        # Koprozessor-Tonalität & Kausalitätsprüfung
 │   ├── DYNAMIC_STATE.md               # Lebendiger Tages- und Projektfokus
 │   ├── bootstrap.md                   # Ausführender Master-Bootstrap-Prompt
+│   ├── team_hub/                      # Geteilte Firmen-Hub-Vorlagen (SharePoint/Cloud)
+│   ├── team_spoke/                    # Persönlicher Heimathafen mit Pointer auf den Hub
 │   └── modules/                       # Universelle Fach- und Lebensbereichs-Module
 │       ├── OPERATIONS_AND_PROJECTS.md # Projekte, Aufgaben, Meilensteine
 │       ├── RESOURCES_AND_FINANCE.md   # Liquidität, Budgets, Verträge

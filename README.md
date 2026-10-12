@@ -80,7 +80,8 @@ groundsole/
 │   ├── 03_ROLLOUT_AND_INSTANCES.md    # Decoupled Hub-and-Spoke model
 │   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB sharding & local SSD vs. cloud sync
 │   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Tier Document Governance & Derived Views
-│   └── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-Neutral Entry Point & The Minimal Core Triad
+│   ├── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-Neutral Entry Point & The Minimal Core Triad
+│   └── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Two-Tier Federation & Brownfield Ingestion
 ├── templates/                         # Clean boilerplate templates
 │   ├── AGENTS.md                      # Universal agent entry point (Minimal Core Triad)
 │   ├── index.md                       # Authoritative memory index
@@ -88,6 +89,8 @@ groundsole/
 │   ├── STYLE_AND_GUARDRAILS.md        # Coprocessor tone & causality checks
 │   ├── DYNAMIC_STATE.md               # Active operational focus
 │   ├── bootstrap.md                   # Self-Executing Master Bootstrap Prompt
+│   ├── team_hub/                      # Shared organizational hub templates (SharePoint/Cloud)
+│   ├── team_spoke/                    # Personal workstation anchor pointing to team hub
 │   └── modules/                       # Universal domain state modules
 │       ├── OPERATIONS_AND_PROJECTS.md # Deliverables & milestones (personal / team)
 │       ├── RESOURCES_AND_FINANCE.md   # Liquidity, budgets & commitments
