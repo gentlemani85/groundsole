@@ -186,7 +186,13 @@ def get_managed_daemons() -> List[Dict[str, Any]]:
             log_path = p.get("StandardOutPath")
             d_id = None
 
-            if "memory_indexer.py" in args_str:
+            if "dreaming.py" in args_str:
+                d_id = "groundsole-dreaming"
+                title = "🌙 Groundsole Dreaming (Konsolidierung)"
+                desc = "Biophysikalische Konsolidierung (Prinzip 15): Verfall, Vektor-Clusterung & Widerspruchs-Audit."
+                if not log_path:
+                    log_path = os.path.expanduser("~/Library/Logs/groundsole_dreaming.log")
+            elif "memory_indexer.py" in args_str:
                 d_id = "memory-buffer-sync"
                 title = "⚡ Vektorpuffer-Sync (Heartbeat)"
                 desc = "Liest neue ungespeicherte Turns leise in memory_buffer.db für alle Chat-Harnesses ein."
@@ -786,6 +792,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-top-color: #38BDF8;
       animation: spin 0.8s linear infinite;
     }
+    .lang-btn {
+      appearance: none;
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .lang-btn:hover {
+      background: var(--surface-subtle);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -794,10 +821,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <header>
     <div class="header-title">
       <h1>⚡ Groundsole Cockpit</h1>
-      <p>Autonome Schaltzentrale auf deiner SSD · Plattformneutral für alle Agenten & Chat-Harnesses</p>
+      <p id="header-subtitle">Autonome Schaltzentrale auf deiner SSD · Plattformneutral für alle Agenten & Chat-Harnesses</p>
     </div>
     <div class="badges-group">
       <div class="badge-row">
+        <button class="lang-btn" id="lang-btn" onclick="toggleLanguage()">🇬🇧 English</button>
         <span class="badge badge-inference" id="inference-badge">🤖 Inferenz: Wird ermittelt...</span>
         <span class="badge" id="live-badge">100% LOKAL & AKTIV</span>
       </div>
@@ -808,24 +836,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <!-- 1. WISSENSFUNDAMENT -->
   <div class="card">
     <div class="card-header">
-      <h2>🧠 Das Wissensfundament (SSOT auf Festplatte)</h2>
-      <p>Alle Agenten (Claude Code, Antigravity, Hermes, Cursor, OpenWebUI) greifen deterministisch auf diesen lokalen Datenbestand zu.</p>
+      <h2 id="sec-knowledge-title">🧠 Das Wissensfundament (SSOT auf Festplatte)</h2>
+      <p id="sec-knowledge-sub">Alle Agenten (Claude Code, Antigravity, Hermes, Cursor, OpenWebUI) greifen deterministisch auf diesen lokalen Datenbestand zu.</p>
     </div>
     <div class="stats-grid">
       <div class="stat-box">
         <div class="stat-val" id="val-transcripts">-</div>
-        <div class="stat-label">Archivierte Sitzungen</div>
-        <div class="stat-sub">Roh-Transkripte in 00_MEMORY/transcripts/</div>
+        <div class="stat-label" id="lbl-transcripts">Archivierte Sitzungen</div>
+        <div class="stat-sub" id="sub-transcripts">Roh-Transkripte in 00_MEMORY/transcripts/</div>
       </div>
       <div class="stat-box">
         <div class="stat-val" id="val-langmem">-</div>
-        <div class="stat-label">Persistente Fakten</div>
+        <div class="stat-label" id="lbl-facts">Persistente Fakten</div>
         <div class="stat-sub" id="sub-langmem">Gefiltert in langmem_store.db</div>
       </div>
       <div class="stat-box">
         <div class="stat-val" id="val-vectors">-</div>
-        <div class="stat-label">Such-Vektoren</div>
-        <div class="stat-sub">FastEmbed Chunks in Vektordatenbanken</div>
+        <div class="stat-label" id="lbl-vectors">Such-Vektoren</div>
+        <div class="stat-sub" id="sub-vectors">FastEmbed Chunks in Vektordatenbanken</div>
       </div>
     </div>
   </div>
@@ -833,8 +861,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <!-- 2. HINTERGRUND-DIENSTE -->
   <div class="card">
     <div class="card-header">
-      <h2>🛡️ Autonome System-Hintergrunddienste</h2>
-      <p>Laufen deterministisch auf Betriebssystem-Ebene im Hintergrund. Zeitpläne und Schalter können hier direkt angepasst werden.</p>
+      <h2 id="sec-daemons-title">🛡️ Autonome System-Hintergrunddienste</h2>
+      <p id="sec-daemons-sub">Laufen deterministisch auf Betriebssystem-Ebene im Hintergrund. Zeitpläne und Schalter können hier direkt angepasst werden.</p>
     </div>
 
     <div id="daemons-container">
@@ -845,35 +873,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <!-- 3. SOFORT-AKTIONEN -->
   <div class="card">
     <div class="card-header">
-      <h2>🚀 Sofort-Aktionen (Manuell auslösen)</h2>
-      <p>Prozesse sofort gezielt starten, ohne auf die Zeitautomatik oder ein Chat-Kommando zu warten.</p>
+      <h2 id="sec-actions-title">🚀 Sofort-Aktionen (Manuell auslösen)</h2>
+      <p id="sec-actions-sub">Prozesse sofort gezielt starten, ohne auf die Zeitautomatik oder ein Chat-Kommando zu warten.</p>
     </div>
 
     <div class="actions-grid">
       <!-- 1. DREAMING -->
       <div class="action-card">
         <div class="action-top">
-          <button class="btn btn-primary" onclick="runAction('dreaming')">🌙 Dreaming starten</button>
+          <button class="btn btn-primary" id="btn-dreaming" onclick="runAction('dreaming')">🌙 Dreaming starten</button>
           <div class="action-info">
-            <h3>Groundsole Dreaming</h3>
-            <p>Biophysikalische Konsolidierung (Prinzip 15): Verfall, Vektor-Clusterung & Widerspruchs-Audit.</p>
+            <h3 id="title-dreaming">Groundsole Dreaming</h3>
+            <p id="desc-dreaming">Biophysikalische Konsolidierung (Prinzip 15): Verfall, Vektor-Clusterung & Widerspruchs-Audit.</p>
           </div>
         </div>
-        <div class="auto-note">
-          ℹ️ <strong>Läuft vollautomatisch:</strong> Wird im Hintergrund nachts oder nach Session-Archivierung ausgeführt. Manueller Klick nur für sofortigen Vorab-Durchlauf nötig.
+        <div class="auto-note" id="note-dreaming">
+          ℹ️ <strong>Läuft vollautomatisch:</strong> Täglich um 03:00 Uhr via Hintergrund-Dienst (siehe oben) oder nach Session-Archivierung. Manueller Klick nur für sofortigen Vorab-Durchlauf nötig.
         </div>
       </div>
 
       <!-- 2. PUFFER SYNC -->
       <div class="action-card">
         <div class="action-top">
-          <button class="btn" onclick="runAction('sync')">⚡ Puffer syncen</button>
+          <button class="btn" id="btn-sync" onclick="runAction('sync')">⚡ Puffer syncen</button>
           <div class="action-info">
-            <h3>Vektorpuffer Sync</h3>
-            <p>Scannt ungespeicherte Turns aller aktiven Harnesses sofort in die Such-Vektoren ein.</p>
+            <h3 id="title-sync">Vektorpuffer Sync</h3>
+            <p id="desc-sync">Scannt ungespeicherte Turns aller aktiven Harnesses sofort in die Such-Vektoren ein.</p>
           </div>
         </div>
-        <div class="auto-note">
+        <div class="auto-note" id="note-sync">
           ℹ️ <strong>Läuft vollautomatisch:</strong> Heartbeat-Hintergrunddienst liest alle 30 Min. ungespeicherte Zeilen ein. Manueller Klick nur für sofortigen Zwischenstand nötig.
         </div>
       </div>
@@ -881,13 +909,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <!-- 3. HEALTH CHECK & HYGIENE -->
       <div class="action-card">
         <div class="action-top">
-          <button class="btn" onclick="runAction('health')">🛡️ Check starten</button>
+          <button class="btn" id="btn-health" onclick="runAction('health')">🛡️ Check starten</button>
           <div class="action-info">
-            <h3>System-Gesundheitscheck & Hygiene</h3>
-            <p>Prüft Pfade, SSOT-Verweise, Markdown-Links und bereinigt temporäre Caches.</p>
+            <h3 id="title-health">System-Gesundheitscheck & Hygiene</h3>
+            <p id="desc-health">Prüft Pfade, SSOT-Verweise, Markdown-Links und bereinigt temporäre Caches.</p>
           </div>
         </div>
-        <div class="auto-note">
+        <div class="auto-note" id="note-health">
           ℹ️ <strong>Läuft vollautomatisch:</strong> Tägliche System-Hygiene scannt den Workspace morgens. Manueller Klick nur nach großen Refactorings nötig.
         </div>
       </div>
@@ -899,12 +927,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="terminal-container">
       <div class="terminal-header">
         <div class="terminal-title">
-          <span>🖥️ Live-Protokoll & Prozessausgabe</span>
+          <span id="terminal-title-text">🖥️ Live-Protokoll & Prozessausgabe</span>
           <span id="terminal-spinner" style="display: none;" class="spinner"></span>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
           <span class="terminal-status" id="terminal-status">Bereit</span>
-          <button class="terminal-clear" onclick="clearTerminal()">Löschen</button>
+          <button class="terminal-clear" id="terminal-clear-btn" onclick="clearTerminal()">Löschen</button>
         </div>
       </div>
       <pre id="terminal-output">// Willkommen im Groundsole Cockpit. Klicke oben auf eine Aktion, um den Prozess live zu verfolgen.</pre>
@@ -913,25 +941,241 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   <script>
     let currentDaemons = [];
+    let currentStats = null;
+
+    const I18N = {
+      de: {
+        lang_btn: "🇬🇧 English",
+        subtitle: "Autonome Schaltzentrale auf deiner SSD · Plattformneutral für alle Agenten & Chat-Harnesses",
+        local_active: "100% LOKAL & AKTIV",
+        updated: "Aktualisiert:",
+        inf_prefix: "🤖 Inferenz:",
+        inf_checking: "Wird ermittelt...",
+        sec_knowledge_title: "🧠 Das Wissensfundament (SSOT auf Festplatte)",
+        sec_knowledge_sub: "Alle Agenten (Claude Code, Antigravity, Hermes, Cursor, OpenWebUI) greifen deterministisch auf diesen lokalen Datenbestand zu.",
+        stat_sessions: "Archivierte Sitzungen",
+        stat_sessions_sub: "Roh-Transkripte in 00_MEMORY/transcripts/",
+        stat_facts: "Persistente Fakten",
+        stat_facts_sub: "gesamt (inkl. entwerteter Audit-Historie)",
+        stat_vectors: "Such-Vektoren",
+        stat_vectors_sub: "FastEmbed Chunks in Vektordatenbanken",
+        sec_daemons_title: "🛡️ Autonome System-Hintergrunddienste",
+        sec_daemons_sub: "Laufen deterministisch auf Betriebssystem-Ebene im Hintergrund. Zeitpläne und Schalter können hier direkt angepasst werden.",
+        no_daemons: "Aktuell sind keine Hintergrunddienste eingerichtet. Alle Aktionen können manuell ausgeführt werden.",
+        status_active: "● AKTIV",
+        status_paused: "○ PAUSIERT",
+        switch_on: "EIN",
+        switch_off: "AUS",
+        btn_edit: "Ändern",
+        btn_save: "Speichern",
+        btn_cancel: "Abbrechen",
+        lbl_interval: "Intervall:",
+        lbl_time: "Uhrzeit:",
+        lbl_weekday: "Wochentag:",
+        opt_daily: "Täglich",
+        days: {1: "Montags", 2: "Dienstags", 3: "Mittwochs", 4: "Donnerstags", 5: "Freitags", 6: "Samstags", 7: "Sonntags", 0: "Sonntags"},
+        every_x_min: (m) => `Alle ${m} Minuten`,
+        every_x_hrs: (h, m) => `Alle ${h} Std. (${m} Min.)`,
+        daily_at: (t) => `Täglich um ${t}`,
+        every_day_at: (d, t) => `Jeden ${d} um ${t}`,
+        sec_actions_title: "🚀 Sofort-Aktionen (Manuell auslösen)",
+        sec_actions_sub: "Prozesse sofort gezielt starten, ohne auf die Zeitautomatik oder ein Chat-Kommando zu warten.",
+        btn_dreaming: "🌙 Dreaming starten",
+        title_dreaming: "Groundsole Dreaming",
+        desc_dreaming: "Biophysikalische Konsolidierung (Prinzip 15): Verfall, Vektor-Clusterung & Widerspruchs-Audit.",
+        note_dreaming: "ℹ️ <strong>Läuft vollautomatisch:</strong> Täglich um 03:00 Uhr via Hintergrund-Dienst (siehe oben) oder nach Session-Archivierung. Manueller Klick nur für sofortigen Vorab-Durchlauf nötig.",
+        btn_sync: "⚡ Puffer syncen",
+        title_sync: "Vektorpuffer Sync",
+        desc_sync: "Scannt ungespeicherte Turns aller aktiven Harnesses sofort in die Such-Vektoren ein.",
+        note_sync: "ℹ️ <strong>Läuft vollautomatisch:</strong> Heartbeat-Hintergrunddienst liest alle 30 Min. ungespeicherte Zeilen ein. Manueller Klick nur für sofortigen Zwischenstand nötig.",
+        btn_health: "🛡️ Check starten",
+        title_health: "System-Gesundheitscheck & Hygiene",
+        desc_health: "Prüft Pfade, SSOT-Verweise, Markdown-Links und bereinigt temporäre Caches.",
+        note_health: "ℹ️ <strong>Läuft vollautomatisch:</strong> Tägliche System-Hygiene scannt den Workspace morgens. Manueller Klick nur nach großen Refactorings nötig.",
+        sec_term_title: "🖥️ Live-Protokoll & Prozessausgabe",
+        btn_clear: "Löschen",
+        term_ready: "Bereit",
+        term_running: "Führe aus:",
+        term_done: "Abgeschlossen ✅",
+        term_error: "Fehler ❌",
+        term_welcome: "// Willkommen im Groundsole Cockpit. Klicke oben auf eine Aktion, um den Prozess live zu verfolgen."
+      },
+      en: {
+        lang_btn: "🇩🇪 Deutsch",
+        subtitle: "Autonomous Control Center on Local SSD · Platform-neutral for all AI agents & harnesses",
+        local_active: "100% LOCAL & ACTIVE",
+        updated: "Updated:",
+        inf_prefix: "🤖 Inference:",
+        inf_checking: "Detecting...",
+        sec_knowledge_title: "🧠 Grounded Knowledge Base (Local SSOT)",
+        sec_knowledge_sub: "All AI agents (Claude Code, Antigravity, Hermes, Cursor, OpenWebUI) deterministically access this local repository.",
+        stat_sessions: "Archived Sessions",
+        stat_sessions_sub: "Raw transcripts in 00_MEMORY/transcripts/",
+        stat_facts: "Persistent Facts",
+        stat_facts_sub: "total (including deprecated audit history)",
+        stat_vectors: "Search Vectors",
+        stat_vectors_sub: "FastEmbed chunks in vector databases",
+        sec_daemons_title: "🛡️ Autonomous Background Daemons",
+        sec_daemons_sub: "Run deterministically at the operating system level. Schedules and toggles can be adjusted directly here.",
+        no_daemons: "No background daemons currently configured. All actions can be triggered manually.",
+        status_active: "● ACTIVE",
+        status_paused: "○ PAUSED",
+        switch_on: "ON",
+        switch_off: "OFF",
+        btn_edit: "Edit",
+        btn_save: "Save",
+        btn_cancel: "Cancel",
+        lbl_interval: "Interval:",
+        lbl_time: "Time:",
+        lbl_weekday: "Weekday:",
+        opt_daily: "Daily",
+        days: {1: "Mondays", 2: "Tuesdays", 3: "Wednesdays", 4: "Thursdays", 5: "Fridays", 6: "Saturdays", 7: "Sundays", 0: "Sundays"},
+        every_x_min: (m) => `Every ${m} minutes`,
+        every_x_hrs: (h, m) => `Every ${h} hrs (${m} min)`,
+        daily_at: (t) => `Daily at ${t}`,
+        every_day_at: (d, t) => `Every ${d} at ${t}`,
+        sec_actions_title: "🚀 Immediate Actions (Manual Triggers)",
+        sec_actions_sub: "Trigger processes on-demand without waiting for scheduled timers or chat commands.",
+        btn_dreaming: "🌙 Run Dreaming",
+        title_dreaming: "Groundsole Dreaming",
+        desc_dreaming: "Biophysical consolidation (Principle 15): Temporal decay, vector clustering & contradiction audit.",
+        note_dreaming: "ℹ️ <strong>Runs automatically:</strong> Daily at 03:00 AM via background daemon (see above) or after session archive. Manual click only needed for an immediate run.",
+        btn_sync: "⚡ Sync Buffer",
+        title_sync: "Memory Buffer Sync",
+        desc_sync: "Quietly indexes new uncommitted conversation turns into search vectors for all harnesses.",
+        note_sync: "ℹ️ <strong>Runs automatically:</strong> Heartbeat daemon synchronizes turns every 30 minutes. Manual click only needed for an instant snapshot.",
+        btn_health: "🛡️ Run Health Check",
+        title_health: "System Health & Hygiene",
+        desc_health: "Verifies paths, SSOT pointers, Markdown links and purges orphaned caches.",
+        note_health: "ℹ️ <strong>Runs automatically:</strong> Daily system hygiene scans the workspace every morning. Manual click only needed after major refactorings.",
+        sec_term_title: "🖥️ Live Terminal & Output",
+        btn_clear: "Clear",
+        term_ready: "Ready",
+        term_running: "Running:",
+        term_done: "Completed ✅",
+        term_error: "Error ❌",
+        term_welcome: "// Welcome to Groundsole Cockpit. Click an action above to observe real-time execution."
+      }
+    };
+
+    const DAEMON_I18N = {
+      en: {
+        "groundsole-dreaming": {
+          title: "🌙 Groundsole Dreaming (Consolidation)",
+          desc: "Biophysical consolidation (Principle 15): Temporal decay, vector clustering & contradiction audit."
+        },
+        "memory-buffer-sync": {
+          title: "⚡ Memory Buffer Sync (Heartbeat)",
+          desc: "Quietly indexes new uncommitted conversation turns into memory_buffer.db for all harnesses."
+        },
+        "system-hygiene": {
+          title: "🛡️ Automated System Hygiene",
+          desc: "Purges orphaned caches, temporary telemetry and verifies SSOT path pointers."
+        },
+        "workspace-backup": {
+          title: "💾 Workspace & Cloud Backup",
+          desc: "Automated compressed snapshot backup of the workspace."
+        },
+        "backup-antigravity": {
+          title: "💾 Antigravity Backup",
+          desc: "Daily snapshot backup of the Antigravity configuration."
+        }
+      }
+    };
+
+    let currentLang = localStorage.getItem('groundsole_lang') || ((navigator.language && navigator.language.startsWith('de')) ? 'de' : 'en');
+
+    function applyLanguage() {
+      const t = I18N[currentLang] || I18N.de;
+      document.getElementById('lang-btn').textContent = t.lang_btn;
+      document.getElementById('header-subtitle').textContent = t.subtitle;
+      document.getElementById('live-badge').textContent = t.local_active;
+      
+      document.getElementById('sec-knowledge-title').textContent = t.sec_knowledge_title;
+      document.getElementById('sec-knowledge-sub').textContent = t.sec_knowledge_sub;
+      document.getElementById('lbl-transcripts').textContent = t.stat_sessions;
+      document.getElementById('sub-transcripts').textContent = t.stat_sessions_sub;
+      document.getElementById('lbl-facts').textContent = t.stat_facts;
+      document.getElementById('lbl-vectors').textContent = t.stat_vectors;
+      document.getElementById('sub-vectors').textContent = t.stat_vectors_sub;
+
+      document.getElementById('sec-daemons-title').textContent = t.sec_daemons_title;
+      document.getElementById('sec-daemons-sub').textContent = t.sec_daemons_sub;
+
+      document.getElementById('sec-actions-title').textContent = t.sec_actions_title;
+      document.getElementById('sec-actions-sub').textContent = t.sec_actions_sub;
+      document.getElementById('btn-dreaming').textContent = t.btn_dreaming;
+      document.getElementById('title-dreaming').textContent = t.title_dreaming;
+      document.getElementById('desc-dreaming').textContent = t.desc_dreaming;
+      document.getElementById('note-dreaming').innerHTML = t.note_dreaming;
+
+      document.getElementById('btn-sync').textContent = t.btn_sync;
+      document.getElementById('title-sync').textContent = t.title_sync;
+      document.getElementById('desc-sync').textContent = t.desc_sync;
+      document.getElementById('note-sync').innerHTML = t.note_sync;
+
+      document.getElementById('btn-health').textContent = t.btn_health;
+      document.getElementById('title-health').textContent = t.title_health;
+      document.getElementById('desc-health').textContent = t.desc_health;
+      document.getElementById('note-health').innerHTML = t.note_health;
+
+      document.getElementById('terminal-title-text').textContent = t.sec_term_title;
+      document.getElementById('terminal-clear-btn').textContent = t.btn_clear;
+    }
+
+    function toggleLanguage() {
+      currentLang = (currentLang === 'de' ? 'en' : 'de');
+      localStorage.setItem('groundsole_lang', currentLang);
+      applyLanguage();
+      renderDaemons();
+      if (currentStats) {
+        updateStatsUI(currentStats);
+      }
+    }
+
+    function formatScheduleDisplay(d) {
+      const t = I18N[currentLang] || I18N.de;
+      if (d.schedule_type === 'interval') {
+        const min = d.interval_minutes || 30;
+        if (min >= 60 && min % 60 === 0) {
+          return t.every_x_hrs(min / 60, min);
+        }
+        return t.every_x_min(min);
+      } else if (d.schedule_type === 'calendar') {
+        const timeStr = `${String(d.calendar_hour).padStart(2,'0')}:${String(d.calendar_minute).padStart(2,'0')}`;
+        if (d.calendar_weekday !== null && d.calendar_weekday !== undefined && t.days[d.calendar_weekday]) {
+          return t.every_day_at(t.days[d.calendar_weekday], timeStr);
+        }
+        return t.daily_at(timeStr);
+      }
+      return d.schedule_display || '-';
+    }
+
+    function updateStatsUI(data) {
+      const t = I18N[currentLang] || I18N.de;
+      document.getElementById('val-transcripts').textContent = `${data.transcripts} ${currentLang === 'de' ? 'Sitzungen' : 'Sessions'}`;
+      document.getElementById('val-langmem').textContent = `${data.langmem_active} ${currentLang === 'de' ? 'Fakten' : 'Facts'}`;
+      document.getElementById('sub-langmem').textContent = `${data.langmem_total} ${t.stat_facts_sub}`;
+      document.getElementById('val-vectors').textContent = `${data.vectors.toLocaleString()} Chunks`;
+
+      if (data.inference) {
+        const infBadge = document.getElementById('inference-badge');
+        infBadge.textContent = `${t.inf_prefix} ${data.inference.label}`;
+        infBadge.title = `${data.inference.desc} (${data.inference.mode})`;
+      }
+
+      document.getElementById('last-update').textContent = `${t.updated} ${data.updated_at}`;
+    }
 
     async function loadStats() {
       try {
         const res = await fetch('/api/stats');
         const data = await res.json();
-        document.getElementById('val-transcripts').textContent = `${data.transcripts} Sitzungen`;
-        document.getElementById('val-langmem').textContent = `${data.langmem_active} Fakten`;
-        document.getElementById('sub-langmem').textContent = `${data.langmem_total} gesamt (inkl. entwerteter Audit-Historie)`;
-        document.getElementById('val-vectors').textContent = `${data.vectors.toLocaleString()} Chunks`;
-
-        if (data.inference) {
-          const infBadge = document.getElementById('inference-badge');
-          infBadge.textContent = `🤖 Inferenz: ${data.inference.label}`;
-          infBadge.title = `${data.inference.desc} (${data.inference.mode})`;
-        }
+        currentStats = data;
+        updateStatsUI(data);
 
         currentDaemons = data.daemons || [];
         renderDaemons();
-        document.getElementById('last-update').textContent = `Aktualisiert: ${data.updated_at}`;
       } catch (e) {
         console.warn('Fehler beim Laden der Statistiken:', e);
       }
@@ -939,37 +1183,48 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function renderDaemons() {
       const container = document.getElementById('daemons-container');
+      const t = I18N[currentLang] || I18N.de;
+
       if (!currentDaemons || currentDaemons.length === 0) {
         container.innerHTML = `
           <div style="font-size: 12px; color: var(--text-muted); padding: 8px;">
-            Aktuell sind keine Hintergrunddienste eingerichtet. Alle Aktionen können manuell ausgeführt werden.
+            ${t.no_daemons}
           </div>`;
         return;
       }
 
-      container.innerHTML = currentDaemons.map((d, idx) => `
+      container.innerHTML = currentDaemons.map((d) => {
+        let displayTitle = d.title;
+        let displayDesc = d.desc;
+        if (currentLang === 'en' && DAEMON_I18N.en[d.id]) {
+          displayTitle = DAEMON_I18N.en[d.id].title;
+          displayDesc = DAEMON_I18N.en[d.id].desc;
+        }
+        const schedDisplay = formatScheduleDisplay(d);
+
+        return `
         <div class="daemon-row" id="daemon-row-${d.id}">
           <div class="daemon-top">
             <div class="daemon-title-area">
-              <span class="daemon-title">${d.title}</span>
+              <span class="daemon-title">${displayTitle}</span>
               <span class="daemon-id">${d.label}</span>
             </div>
             <div class="switch-container">
-              <span class="switch-label">${d.is_active ? 'EIN' : 'AUS'}</span>
+              <span class="switch-label">${d.is_active ? t.switch_on : t.switch_off}</span>
               <label class="switch">
                 <input type="checkbox" ${d.is_active ? 'checked' : ''} onchange="toggleDaemon('${d.id}', this.checked)">
                 <span class="slider"></span>
               </label>
             </div>
           </div>
-          <div class="daemon-desc">${d.desc}</div>
+          <div class="daemon-desc">${displayDesc}</div>
           <div class="daemon-meta">
             <span class="status-badge ${d.is_active ? 'status-active' : 'status-paused'}">
-              ${d.is_active ? '● AKTIV' : '○ PAUSIERT'}
+              ${d.is_active ? t.status_active : t.status_paused}
             </span>
             <span class="schedule-badge">
-              <span>${d.schedule_type === 'interval' ? '⏱️' : '⏰'} ${d.schedule_display}</span>
-              <button class="btn-edit-sched" onclick="toggleEditSched('${d.id}')">Ändern</button>
+              <span>${d.schedule_type === 'interval' ? '⏱️' : '⏰'} ${schedDisplay}</span>
+              <button class="btn-edit-sched" onclick="toggleEditSched('${d.id}')">${t.btn_edit}</button>
             </span>
             <span class="daemon-log">${d.status_text}</span>
           </div>
@@ -977,35 +1232,36 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <!-- Inline Schedule Editor -->
           <div class="schedule-editor" id="sched-editor-${d.id}">
             ${d.schedule_type === 'interval' ? `
-              <span>Intervall:</span>
+              <span>${t.lbl_interval}</span>
               <select id="sel-min-${d.id}">
-                <option value="15" ${d.interval_minutes == 15 ? 'selected' : ''}>Alle 15 Minuten</option>
-                <option value="30" ${d.interval_minutes == 30 ? 'selected' : ''}>Alle 30 Minuten (Standard)</option>
-                <option value="60" ${d.interval_minutes == 60 ? 'selected' : ''}>Alle 60 Minuten (1 Std.)</option>
-                <option value="120" ${d.interval_minutes == 120 ? 'selected' : ''}>Alle 120 Minuten (2 Std.)</option>
+                <option value="15" ${d.interval_minutes == 15 ? 'selected' : ''}>15 ${currentLang === 'de' ? 'Minuten' : 'minutes'}</option>
+                <option value="30" ${d.interval_minutes == 30 ? 'selected' : ''}>30 ${currentLang === 'de' ? 'Minuten (Standard)' : 'minutes (default)'}</option>
+                <option value="60" ${d.interval_minutes == 60 ? 'selected' : ''}>60 ${currentLang === 'de' ? 'Minuten (1 Std.)' : 'minutes (1 hr)'}</option>
+                <option value="120" ${d.interval_minutes == 120 ? 'selected' : ''}>120 ${currentLang === 'de' ? 'Minuten (2 Std.)' : 'minutes (2 hrs)'}</option>
               </select>
-              <button class="btn-sm btn-sm-primary" onclick="saveIntervalSched('${d.id}')">Speichern</button>
-              <button class="btn-sm" onclick="toggleEditSched('${d.id}')">Abbrechen</button>
+              <button class="btn-sm btn-sm-primary" onclick="saveIntervalSched('${d.id}')">${t.btn_save}</button>
+              <button class="btn-sm" onclick="toggleEditSched('${d.id}')">${t.btn_cancel}</button>
             ` : `
-              <span>Uhrzeit:</span>
+              <span>${t.lbl_time}</span>
               <input type="time" id="inp-time-${d.id}" value="${String(d.calendar_hour).padStart(2,'0')}:${String(d.calendar_minute).padStart(2,'0')}">
-              <span>Wochentag:</span>
+              <span>${t.lbl_weekday}</span>
               <select id="sel-day-${d.id}">
-                <option value="daily" ${d.calendar_weekday === null ? 'selected' : ''}>Täglich</option>
-                <option value="1" ${d.calendar_weekday == 1 ? 'selected' : ''}>Montags</option>
-                <option value="2" ${d.calendar_weekday == 2 ? 'selected' : ''}>Dienstags</option>
-                <option value="3" ${d.calendar_weekday == 3 ? 'selected' : ''}>Mittwochs</option>
-                <option value="4" ${d.calendar_weekday == 4 ? 'selected' : ''}>Donnerstags</option>
-                <option value="5" ${d.calendar_weekday == 5 ? 'selected' : ''}>Freitags</option>
-                <option value="6" ${d.calendar_weekday == 6 ? 'selected' : ''}>Samstags</option>
-                <option value="7" ${d.calendar_weekday == 7 ? 'selected' : ''}>Sonntags</option>
+                <option value="daily" ${d.calendar_weekday === null ? 'selected' : ''}>${t.opt_daily}</option>
+                <option value="1" ${d.calendar_weekday == 1 ? 'selected' : ''}>${t.days[1]}</option>
+                <option value="2" ${d.calendar_weekday == 2 ? 'selected' : ''}>${t.days[2]}</option>
+                <option value="3" ${d.calendar_weekday == 3 ? 'selected' : ''}>${t.days[3]}</option>
+                <option value="4" ${d.calendar_weekday == 4 ? 'selected' : ''}>${t.days[4]}</option>
+                <option value="5" ${d.calendar_weekday == 5 ? 'selected' : ''}>${t.days[5]}</option>
+                <option value="6" ${d.calendar_weekday == 6 ? 'selected' : ''}>${t.days[6]}</option>
+                <option value="7" ${d.calendar_weekday == 7 ? 'selected' : ''}>${t.days[7]}</option>
               </select>
-              <button class="btn-sm btn-sm-primary" onclick="saveCalendarSched('${d.id}')">Speichern</button>
-              <button class="btn-sm" onclick="toggleEditSched('${d.id}')">Abbrechen</button>
+              <button class="btn-sm btn-sm-primary" onclick="saveCalendarSched('${d.id}')">${t.btn_save}</button>
+              <button class="btn-sm" onclick="toggleEditSched('${d.id}')">${t.btn_cancel}</button>
             `}
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function toggleEditSched(daemonId) {
@@ -1026,10 +1282,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         if (data.status === 'ok') {
           loadStats();
         } else {
-          alert('Fehler beim Ändern des Dienstes: ' + (data.error || 'Unbekannt'));
+          alert('Error: ' + (data.error || 'Unknown'));
         }
       } catch (err) {
-        alert('Netzwerkfehler: ' + err.message);
+        alert('Network Error: ' + err.message);
       }
     }
 
@@ -1047,10 +1303,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           toggleEditSched(daemonId);
           loadStats();
         } else {
-          alert('Fehler beim Speichern: ' + (data.error || 'Unbekannt'));
+          alert('Error: ' + (data.error || 'Unknown'));
         }
       } catch (err) {
-        alert('Netzwerkfehler: ' + err.message);
+        alert('Network Error: ' + err.message);
       }
     }
 
@@ -1071,18 +1327,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           toggleEditSched(daemonId);
           loadStats();
         } else {
-          alert('Fehler beim Speichern: ' + (data.error || 'Unbekannt'));
+          alert('Error: ' + (data.error || 'Unknown'));
         }
       } catch (err) {
-        alert('Netzwerkfehler: ' + err.message);
+        alert('Network Error: ' + err.message);
       }
     }
 
     function clearTerminal() {
-      document.getElementById('terminal-output').textContent = '// Konsole geleert.\\n';
+      document.getElementById('terminal-output').textContent = '// Output cleared.\\n';
     }
 
     async function runAction(actionName) {
+      const t = I18N[currentLang] || I18N.de;
       const buttons = document.querySelectorAll('.btn');
       buttons.forEach(b => b.disabled = true);
 
@@ -1090,10 +1347,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const spinnerEl = document.getElementById('terminal-spinner');
       const outEl = document.getElementById('terminal-output');
 
-      statusEl.textContent = `Führe aus: ${actionName}...`;
+      statusEl.textContent = `${t.term_running} ${actionName}...`;
       statusEl.style.color = '#38BDF8';
       spinnerEl.style.display = 'inline-block';
-      outEl.textContent = `▶ Starte Aktion: [${actionName}]\\n----------------------------------------------------\\n`;
+      outEl.textContent = `▶ ${actionName}\\n----------------------------------------------------\\n`;
 
       try {
         const response = await fetch('/api/run', {
@@ -1113,11 +1370,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           outEl.scrollTop = outEl.scrollHeight;
         }
 
-        statusEl.textContent = 'Abgeschlossen ✅';
+        statusEl.textContent = t.term_done;
         statusEl.style.color = '#4ADE80';
       } catch (err) {
-        outEl.textContent += `\\n❌ Verbindungsfehler: ${err.message}\\n`;
-        statusEl.textContent = 'Fehler ❌';
+        outEl.textContent += `\\n❌ Error: ${err.message}\\n`;
+        statusEl.textContent = t.term_error;
         statusEl.style.color = '#F87171';
       } finally {
         spinnerEl.style.display = 'none';
@@ -1126,7 +1383,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
-    // Initiales Laden und 10s Intervall
+    // Initiales Laden
+    applyLanguage();
     loadStats();
     setInterval(loadStats, 10000);
   </script>
@@ -1150,7 +1408,7 @@ class CockpitHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "version": "2.6.0"}).encode("utf-8"))
+            self.wfile.write(json.dumps({"status": "ok", "version": "3.0.0"}).encode("utf-8"))
         elif self.path == "/api/stats":
             stats = get_stats()
             self.send_response(200)
