@@ -114,18 +114,48 @@ def get_stats() -> Dict[str, Any]:
         except Exception as e:
             return f"Info: {e}"
 
+    daemons = []
+    if os.path.exists(SYNC_LOG):
+        daemons.append({
+            "title": "1. Vektorpuffer-Sync (Heartbeat)",
+            "id": "groundsole_memory_sync",
+            "desc": "Liest neue ungespeicherte Turns leise in memory_buffer.db für Antigravity und Hermes ein.",
+            "status": read_last_log_info(SYNC_LOG)
+        })
+
+    if os.path.exists(HYGIENE_LOG):
+        daemons.append({
+            "title": "2. Automatische System-Hygiene",
+            "id": "groundsole_system_hygiene",
+            "desc": "Bereinigt verwaiste Cache-Dateien, temporäre Telemetrie und prüft SSOT-Pfade im Workspace.",
+            "status": read_last_log_info(HYGIENE_LOG)
+        })
+
+    if os.path.exists(WORKSPACE_BACKUP_LOG):
+        daemons.append({
+            "title": "3. Lokales & Cloud-Sicherheits-Backup",
+            "id": "workspace-backup",
+            "desc": "Automatisierte Snapshot-Sicherung des Workspace.",
+            "status": read_last_log_info(WORKSPACE_BACKUP_LOG)
+        })
+
+    if not daemons:
+        daemons.append({
+            "title": "Hintergrund-Dienste",
+            "id": "optional",
+            "desc": "Aktuell sind keine automatischen Hintergrunddienste (Launchd/Cron) aktiv. Alle Aktionen können jederzeit manuell per Klick gestartet werden.",
+            "status": "Manuelle Steuerung aktiv"
+        })
+
     return {
         "transcripts": t_count,
         "langmem_active": f_active,
         "langmem_total": f_total,
         "vectors": v_count,
-        "sync_log": read_last_log_info(SYNC_LOG),
-        "workspace_backup_log": read_last_log_info(WORKSPACE_BACKUP_LOG),
-        "antigravity_backup_log": read_last_log_info(ANTIGRAVITY_BACKUP_LOG),
-
-        "hygiene_log": read_last_log_info(HYGIENE_LOG),
+        "daemons": daemons,
         "updated_at": datetime.now().strftime("%H:%M:%S")
     }
+
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="de">
@@ -468,33 +498,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <p>Laufen deterministisch auf Betriebssystem-Ebene, völlig unabhängig von geöffneten Chat-Fenstern.</p>
     </div>
 
-    <div class="daemon-row">
-      <div class="daemon-top">
-        <span class="daemon-title">1. Vektorpuffer-Sync (Heartbeat)</span>
-        <span class="daemon-id">groundsole_memory_sync</span>
-      </div>
-      <div class="daemon-desc">Liest neue ungespeicherte Turns leise in memory_buffer.db für Antigravity und Hermes ein.</div>
-      <div class="daemon-status" id="log-sync">Lädt...</div>
-    </div>
-
-    <div class="daemon-row">
-      <div class="daemon-top">
-        <span class="daemon-title">2. Automatische System-Hygiene</span>
-        <span class="daemon-id">groundsole_system_hygiene</span>
-      </div>
-      <div class="daemon-desc">Bereinigt verwaiste Cache-Dateien, temporäre Telemetrie und prüft SSOT-Pfade im Workspace.</div>
-      <div class="daemon-status" id="log-hygiene">Lädt...</div>
-    </div>
-
-    <div class="daemon-row">
-      <div class="daemon-top">
-        <span class="daemon-title">3. Lokales & Cloud-Sicherheits-Backup</span>
-        <span class="daemon-id">workspace-backup</span>
-      </div>
-      <div class="daemon-desc">Automatisierte Snapshot-Sicherung nach Google Drive / externen Speicher.</div>
-      <div class="daemon-status" id="log-backup">Lädt...</div>
+    <div id="daemons-container">
+      <div style="font-size: 12px; color: var(--text-muted); padding: 8px;">Dienste werden geladen...</div>
     </div>
   </div>
+
 
   <!-- 3. SOFORT-AKTIONEN -->
   <div class="card">
@@ -581,10 +589,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         document.getElementById('sub-langmem').textContent = `${data.langmem_total} gesamt (inkl. entwerteter Audit-Historie)`;
         document.getElementById('val-vectors').textContent = `${data.vectors.toLocaleString()} Chunks`;
 
-        document.getElementById('log-sync').textContent = data.sync_log;
-        document.getElementById('log-hygiene').textContent = data.hygiene_log;
-        document.getElementById('log-backup').textContent = data.workspace_backup_log;
+        const daemonsContainer = document.getElementById('daemons-container');
+        if (data.daemons && data.daemons.length > 0) {
+          daemonsContainer.innerHTML = data.daemons.map(d => `
+            <div class="daemon-row">
+              <div class="daemon-top">
+                <span class="daemon-title">${d.title}</span>
+                <span class="daemon-id">${d.id}</span>
+              </div>
+              <div class="daemon-desc">${d.desc}</div>
+              <div class="daemon-status">${d.status}</div>
+            </div>
+          `).join('');
+        }
         document.getElementById('last-update').textContent = `Aktualisiert: ${data.updated_at}`;
+
       } catch (e) {
         console.warn('Fehler beim Laden der Statistiken:', e);
       }
