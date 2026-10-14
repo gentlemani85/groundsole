@@ -118,7 +118,9 @@ groundsole/
         ├── crystallize_memory.py      # Post-archival fact & graph crystallizer (Gemini Flash Lite)
         ├── dreaming.py                # Deep Dreaming biophysical memory consolidation & decay
         ├── context_filter_mcp.py      # Zero-spill terminal & web MCP proxy with SQLite FTS5
+        ├── cockpit.py                 # Platform-agnostic local web cockpit & dynamic app launcher
         ├── export_hermes_session.py   # Lossless zero-token Hermes session exporter (SQLite)
+
         ├── export_antigravity_session.py # Zero-token Antigravity session exporter (JSONL)
         ├── knowledge_graph.py         # Zero-API relational knowledge graph (SQLite)
         ├── check_integrity.py         # Zero-dependency link, module & integrity linter

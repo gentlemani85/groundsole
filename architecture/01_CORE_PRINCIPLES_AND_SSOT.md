@@ -156,6 +156,16 @@ Groundsole etabliert den **Context-Filter Proxy** als standardisierten MCP-Serve
 * **Signal-Extraktion statt Datenmüll:** Das Modell erhält ausschließlich kondensierte Signale (Exit-Code, Fehlermeldungen, Stacktraces oder präzise Head/Tail-Vorschauen) samt kompakter Cache-ID.
 * **On-Demand-Chirurgie:** Benötigt das Modell für eine Fehlerbehebung tieferen Kontext, fordert es über gezielte Werkzeuge (`ctx_inspect_lines`, `ctx_search_output`) millimetergenaue Zeilenbereiche an.
 
+---
+
+## 17. Kausale Begründungspflicht für Systemregeln (Chain of Rationale)
+
+Regeln, Verbote und Governance-Vorgaben in Systemprompts und Architekturdokumenten dürfen niemals als bloße Dogmen oder nackte Anweisungen (*„Tue X / Tue nicht Y“*) formuliert sein.
+
+* **Kausalitäts-Prinzip der Instruktionsbefolgung:** Sprachmodelle halten sich statistisch signifikant robuster und konsistenter an Richtlinien, wenn die zugrundeliegende Kausalität explizit mitgeliefert wird: *Warum existiert die Regel, welcher reale Fehlermechanismus soll verhindert werden und welches konkrete Risiko tritt bei Missachtung ein?*
+* **Grounding-Pflicht bei dynamischen Spezifikationen:** Vorgaben wie das Verbot statistischer Inferenz bei Hardware, Benchmarks und Modellständen müssen stets ihre materielle Begründung tragen (Trainings-Cutoff führt zu plausiblen, aber teuren Halluzinationen in der realen Beschaffung).
+
+
 
 
 
