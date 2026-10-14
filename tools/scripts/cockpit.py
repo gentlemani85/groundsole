@@ -1408,7 +1408,7 @@ class CockpitHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "version": "3.0.0"}).encode("utf-8"))
+            self.wfile.write(json.dumps({"status": "ok", "version": "0.2.0"}).encode("utf-8"))
         elif self.path == "/api/stats":
             stats = get_stats()
             self.send_response(200)
