@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Groundsole Dreaming – Biophysikalische Gedächtnis-Konsolidierung (Prinzip 15)
-Konsolidierungs- und Audit-Zyklus im Ruhezustand (analog zum biologischen Schlaf/Träumen):
+scripts/dreaming.py
+
+Groundsole Dreaming – Biophysikalische Gedächtnis-Konsolidierung (Prinzip 14)
+Konsolidierungs- und Audit-Zyklus im Ruhezustand (analog zum biologischen Träumen):
 1. Zeitlicher Verfall (Temporal Decay): Markiert abgelaufene Termine/Fristen als [STATUS: EXPIRED].
 2. Semantische FastEmbed-Clusterung: Erkennt thematisch verwandte Fakten über Key-Grenzen hinweg.
 3. Widerspruchs- & Redundanz-Audit:
    - Hebt Fakt B Fakt A auf? -> [STATUS: DEPRECATED | Abgelöst am ...]
    - Wiederholt Fakt B Fakt A? -> [STATUS: DEPRECATED | Redundant zu ...]
-4. Relationaler Knowledge Graph Sync: Synchronisiert Entwertungen mit graph.db und cognee_db.
-5. DYNAMIC_STATE-Entschlackung: Hält das operative Zustandsdokument schlank.
+4. Cognee Knowledge Graph Sync: Synchronisiert Entwertungen mit cognee_db.
+5. DYNAMIC_STATE-Entschlackung: Bereinigt alte Meilensteine zur Token-Schonung.
 6. Idempotentes Caching: Dauerhafte Sicherung geprüfter Paare in SQLite (0 wiederholte Kosten).
 """
 
@@ -21,61 +23,93 @@ import urllib.request
 import urllib.error
 import argparse
 import time
+import numpy as np
 from datetime import datetime
 from typing import List, Dict, Any, Tuple, Optional
 
-def find_workspace_root():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    workspace_root = os.path.dirname(script_dir)
-    if os.path.exists(os.path.join(workspace_root, "00_MEMORY")):
-        return workspace_root
-    workspace_root_framework = os.path.dirname(workspace_root)
-    if os.path.exists(os.path.join(workspace_root_framework, "00_MEMORY")):
-        return workspace_root_framework
-    if os.path.exists(os.path.join(os.getcwd(), "00_MEMORY")):
-        return os.getcwd()
-    return workspace_root
-
-REPO_ROOT = find_workspace_root()
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEMORY_DIR = os.path.join(REPO_ROOT, "00_MEMORY")
 LANGMEM_DB_PATH = os.path.join(MEMORY_DIR, "langmem_store.db")
-GRAPH_DB_PATH = os.path.join(MEMORY_DIR, "graph.db")
 COGNEE_DB_PATH = os.path.join(MEMORY_DIR, "cognee", "databases", "cognee_db")
 DYNAMIC_STATE_PATH = os.path.join(MEMORY_DIR, "DYNAMIC_STATE.md")
+HERMES_ENV_PATH = os.path.expanduser("~/.hermes/.env")
 MODEL_NAME = "jinaai/jina-embeddings-v2-base-de"
 
-def get_google_api_key() -> Optional[str]:
-    """Liest den Google API Key aus Umgebungsvariablen oder gängigen Konfigurationsdateien."""
-    k = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-    if k:
-        return k.strip()
-
+def get_inference_provider() -> Tuple[str, Optional[str], Optional[str], Optional[str]]:
+    """
+    Ermittelt die verfügbare Inferenz-Quelle:
+    - ("gemini", api_key, url, model)
+    - ("openai", api_key, url, model)
+    - ("ollama", None, url, model)
+    - ("none", None, None, None)
+    """
+    k_google = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
     candidate_files = [
         os.path.expanduser("~/.hermes/.env"),
         os.path.expanduser("~/.config/groundsole/.env"),
         os.path.join(REPO_ROOT, ".env")
     ]
-    for cfile in candidate_files:
-        if os.path.exists(cfile):
-            try:
-                with open(cfile, "r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line.startswith("GOOGLE_API_KEY=") or line.startswith("GEMINI_API_KEY="):
-                            val = line.split("=", 1)[1].strip().strip("'\"")
-                            if val:
-                                return val
-            except Exception:
-                pass
-    return None
+    if not k_google:
+        for cfile in candidate_files:
+            if os.path.exists(cfile):
+                try:
+                    with open(cfile, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if line.startswith("GOOGLE_API_KEY=") or line.startswith("GEMINI_API_KEY="):
+                                k_google = line.split("=", 1)[1].strip().strip("'\"")
+                                break
+                except Exception:
+                    pass
+            if k_google:
+                break
 
-def call_gemini_consolidation_check(api_key: str, fact_a: Dict[str, Any], fact_b: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    if k_google:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={k_google}"
+        return ("gemini", k_google, url, "gemini-2.5-flash")
+
+    k_openrouter = os.environ.get("OPENROUTER_API_KEY")
+    k_openai = os.environ.get("OPENAI_API_KEY")
+    if not (k_openrouter or k_openai):
+        for cfile in candidate_files:
+            if os.path.exists(cfile):
+                try:
+                    with open(cfile, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if line.startswith("OPENROUTER_API_KEY="):
+                                k_openrouter = line.split("=", 1)[1].strip().strip("'\"")
+                            elif line.startswith("OPENAI_API_KEY="):
+                                k_openai = line.split("=", 1)[1].strip().strip("'\"")
+                except Exception:
+                    pass
+
+    if k_openrouter:
+        return ("openai", k_openrouter, "https://openrouter.ai/api/v1/chat/completions", "google/gemini-2.5-flash")
+    if k_openai:
+        return ("openai", k_openai, "https://api.openai.com/v1/chat/completions", "gpt-4o-mini")
+
+    try:
+        req = urllib.request.Request("http://localhost:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=0.2) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            models = [m.get("name") for m in data.get("models", [])]
+            if models:
+                return ("ollama", None, "http://localhost:11434/v1/chat/completions", models[0])
+    except Exception:
+        pass
+
+    return ("none", None, None, None)
+
+
+def call_consolidation_check(fact_a: Dict[str, Any], fact_b: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
-    Fragt Gemini Flash, ob Fakt B (neuer) Fakt A (älter) aufhebt oder wiederholt (Redundanz).
-    Kosten: ~0,0001 € pro Abgleich.
+    Fragt das verfügbare Modell (Gemini, OpenRouter, OpenAI oder Ollama),
+    ob Fakt B (neuer) Fakt A (älter) aufhebt oder wiederholt (Redundanz).
     """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-    headers = {"Content-Type": "application/json"}
+    provider, key, url, model = get_inference_provider()
+    if provider == "none" or not url:
+        return None
 
     prompt = f"""Du bist der Kognitions-Konsolidierer für das lokale Gedächtnis (Groundsole Dreaming).
 Prüfe zwei Einträge aus derselben Wissensdomäne auf zeitliche Widersprüche oder Redundanz:
@@ -98,20 +132,37 @@ Antworte zwingend im folgenden JSON-Format:
 }}
 """
 
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.0, "responseMimeType": "application/json"}
-    }
+    if provider == "gemini":
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.0, "responseMimeType": "application/json"}
+        }
+    else:
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.0,
+            "response_format": {"type": "json_object"}
+        }
 
     try:
         req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            if provider == "gemini":
+                raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            else:
+                raw_text = data["choices"][0]["message"]["content"].strip()
             return json.loads(raw_text)
     except Exception as exc:
-        print(f"⚠️ Konsolidierungs-Check fehlgeschlagen: {exc}", file=sys.stderr)
+        print(f"⚠️ Konsolidierungs-Check ({provider}) fehlgeschlagen: {exc}", file=sys.stderr)
         return None
+
+
 
 def audit_temporal_decay(conn: sqlite3.Connection, apply_changes: bool = False) -> List[Dict[str, Any]]:
     """
@@ -132,6 +183,7 @@ def audit_temporal_decay(conn: sqlite3.Connection, apply_changes: bool = False) 
 
     for r in rows:
         m_id, ts, ns, key, content = r[0], r[1], r[2], r[3], r[4]
+        # Nur wenn explizit terminlicher Charakter vorliegt
         is_termin_context = (
             ns in ("Termine", "Termin", "Fristen") or
             "termin" in key.lower() or
@@ -144,6 +196,7 @@ def audit_temporal_decay(conn: sqlite3.Connection, apply_changes: bool = False) 
         if not is_termin_context:
             continue
 
+        # Datums-Parsing (DD.MM.YYYY)
         matches = re.finditer(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", content)
         for m in matches:
             d, m_num, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
@@ -168,9 +221,11 @@ def audit_temporal_decay(conn: sqlite3.Connection, apply_changes: bool = False) 
 
     return expired_list
 
+
 def ensure_memory_embeddings(conn: sqlite3.Connection, active_records: List[Dict[str, Any]]):
     """
     Berechnet Embeddings für neue LangMem-Fakten und sichert sie dauerhaft in memory_embeddings.
+    Dauert nur beim ersten Mal kurz; danach 0 Millisekunden.
     """
     c = conn.cursor()
     c.execute("""
@@ -190,14 +245,9 @@ def ensure_memory_embeddings(conn: sqlite3.Connection, active_records: List[Dict
         return
 
     print(f"⚡ Vektoriere {len(missing_records)} neue LangMem-Fakten mit FastEmbed...")
-    try:
-        from fastembed import TextEmbedding
-        import numpy as np
-    except ImportError:
-        print("ℹ️ FastEmbed / NumPy nicht installiert. Vektor-Clustering wird übersprungen.")
-        return
-
+    from fastembed import TextEmbedding
     model = TextEmbedding(model_name=MODEL_NAME)
+
     batch_size = 32
     for i in range(0, len(missing_records), batch_size):
         chunk = missing_records[i:i + batch_size]
@@ -212,6 +262,7 @@ def ensure_memory_embeddings(conn: sqlite3.Connection, active_records: List[Dict
 
         c.executemany("INSERT OR REPLACE INTO memory_embeddings (id, vector, updated_at) VALUES (?, ?, ?)", insert_rows)
         conn.commit()
+
 
 def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_changes: bool = False, min_sim: float = 0.74) -> Dict[str, Any]:
     """
@@ -247,11 +298,7 @@ def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_change
 
     ensure_memory_embeddings(conn, records)
 
-    try:
-        import numpy as np
-    except ImportError:
-        return {"total_scanned": len(records), "deprecations": [], "redundancies": []}
-
+    # Vektoren laden
     c.execute("SELECT id, vector FROM memory_embeddings")
     vector_map = {row[0]: np.frombuffer(row[1], dtype=np.float32) for row in c.fetchall()}
 
@@ -263,6 +310,7 @@ def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_change
     norms = np.linalg.norm(matrix, axis=1, keepdims=True)
     matrix = matrix / np.maximum(norms, 1e-9)
 
+    # 2 Millisekunden Matrix-Multiplikation
     sim_matrix = np.dot(matrix, matrix.T)
 
     c.execute("SELECT pair_hash, result FROM dreaming_checked_pairs")
@@ -272,6 +320,7 @@ def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_change
     deprecations = []
     redundancies = []
 
+    # Finde Kandidaten (entweder gleicher Key ODER Cosine-Similarity >= min_sim)
     candidate_pairs = []
     for i in range(len(valid_records)):
         for j in range(i + 1, len(valid_records)):
@@ -283,8 +332,10 @@ def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_change
             if same_key or score >= min_sim:
                 candidate_pairs.append((older, newer, score))
 
+    # Sortiere nach höchster Relevanz / Ähnlichkeit
     candidate_pairs.sort(key=lambda x: x[2], reverse=True)
 
+    # Max 25 ungescannte Checks pro Lauf zur Kosten- und Zeit-Kontrolle (~0,002 €)
     checks_performed = 0
     max_new_checks = 25
 
@@ -334,6 +385,7 @@ def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_change
                 "newer_timestamp": newer["timestamp"][:10]
             })
 
+    # Änderungen anwenden
     if apply_changes:
         for d in deprecations:
             new_text = f"[STATUS: DEPRECATED | Abgelöst am {d['newer_timestamp']} durch '{d['newer_key']}']: {d['older_content']}"
@@ -353,68 +405,68 @@ def audit_semantic_clusters_and_conflicts(conn: sqlite3.Connection, apply_change
         "redundancies": redundancies
     }
 
-def audit_relational_graphs(deprecated_keys: List[str] = None, apply_changes: bool = False) -> Dict[str, Any]:
+
+def audit_cognee_graph(deprecated_keys: List[str] = None, apply_changes: bool = False) -> Dict[str, Any]:
     """
-    Synchronisiert entwertete Fakten mit graph.db (native SQLite) und cognee_db (falls vorhanden).
+    Synchronisiert entwertete Fakten mit dem Cognee Wissensgraphen (cognee_db).
     """
-    total_edges = 0
+    if not os.path.exists(COGNEE_DB_PATH):
+        return {"status": "skipped", "message": "cognee_db existiert nicht."}
+
+    conn = sqlite3.connect(COGNEE_DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT e.id, n1.label, e.relationship_name, n2.label, e.attributes, e.created_at
+        FROM edges e
+        JOIN nodes n1 ON e.source_node_id = n1.id
+        JOIN nodes n2 ON e.destination_node_id = n2.id
+        ORDER BY e.created_at ASC
+    """)
+    edges = c.fetchall()
+
     deprecated_edges = 0
     updated_edges = 0
 
-    target_dbs = []
-    if os.path.exists(GRAPH_DB_PATH):
-        target_dbs.append(("graph.db", GRAPH_DB_PATH, "relationship"))
-    if os.path.exists(COGNEE_DB_PATH):
-        target_dbs.append(("cognee_db", COGNEE_DB_PATH, "relationship_name"))
+    for e in edges:
+        attrs = {}
+        if e[4]:
+            try:
+                attrs = json.loads(e[4])
+            except Exception:
+                pass
+        if attrs.get("status") == "deprecated":
+            deprecated_edges += 1
 
-    for db_label, db_path, rel_col in target_dbs:
-        try:
-            conn = sqlite3.connect(db_path)
-            c = conn.cursor()
-            c.execute(f"SELECT id, attributes FROM edges")
-            edges = c.fetchall()
-            total_edges += len(edges)
-
-            for e in edges:
+    if apply_changes and deprecated_keys:
+        for k in deprecated_keys:
+            c.execute("""
+                SELECT e.id, e.attributes FROM edges e
+                JOIN nodes n2 ON e.destination_node_id = n2.id
+                WHERE n2.label LIKE ?
+            """, (f"%{k}%",))
+            for row in c.fetchall():
+                eid, attr_str = row[0], row[1]
                 attrs = {}
-                if e[1]:
+                if attr_str:
                     try:
-                        attrs = json.loads(e[1])
+                        attrs = json.loads(attr_str)
                     except Exception:
                         pass
-                if attrs.get("status") == "deprecated":
-                    deprecated_edges += 1
+                if attrs.get("status") != "deprecated":
+                    attrs["status"] = "deprecated"
+                    attrs["deprecated_at"] = datetime.now().isoformat()
+                    c.execute("UPDATE edges SET attributes = ? WHERE id = ?", (json.dumps(attrs), eid))
+                    updated_edges += 1
+        conn.commit()
 
-            if apply_changes and deprecated_keys:
-                for k in deprecated_keys:
-                    c.execute("""
-                        SELECT e.id, e.attributes FROM edges e
-                        JOIN nodes n ON (e.target_id = n.id OR e.source_id = n.id)
-                        WHERE n.label LIKE ?
-                    """, (f"%{k}%",))
-                    for row in c.fetchall():
-                        eid, attr_str = row[0], row[1]
-                        attrs = {}
-                        if attr_str:
-                            try:
-                                attrs = json.loads(attr_str)
-                            except Exception:
-                                pass
-                        if attrs.get("status") != "deprecated":
-                            attrs["status"] = "deprecated"
-                            attrs["deprecated_at"] = datetime.now().isoformat()
-                            c.execute("UPDATE edges SET attributes = ? WHERE id = ?", (json.dumps(attrs), eid))
-                            updated_edges += 1
-                conn.commit()
-            conn.close()
-        except Exception as exc:
-            print(f"ℹ️ Graph-Audit {db_label}: {exc}", file=sys.stderr)
-
+    conn.close()
     return {
-        "total_edges": total_edges,
+        "total_edges": len(edges),
         "deprecated_edges": deprecated_edges,
         "updated_edges": updated_edges
     }
+
 
 def prune_dynamic_state(apply_changes: bool = False) -> Dict[str, Any]:
     """
@@ -429,13 +481,13 @@ def prune_dynamic_state(apply_changes: bool = False) -> Dict[str, Any]:
     lines = content.splitlines()
     cleaned_lines = []
     removed_count = 0
-    in_milestones = False
+    in_next_steps = False
 
     for line in lines:
         if line.startswith("## 2. Nächste geplante Schritte") or line.startswith("## 2. Letzte 10 kristallisierte Fakten"):
-            in_milestones = True
+            in_next_steps = True
 
-        if in_milestones and "Abgeschlossen ✅" in line:
+        if in_next_steps and "Abgeschlossen ✅" in line:
             date_match = re.search(r"\*\*(\d{1,2})\.\s+([A-Za-zä]+)\s+(\d{4})", line)
             if date_match:
                 removed_count += 1
@@ -452,28 +504,25 @@ def prune_dynamic_state(apply_changes: bool = False) -> Dict[str, Any]:
         "applied": apply_changes
     }
 
+
 def run_dreaming(apply_changes: bool = False) -> Dict[str, Any]:
     """Führt den vollen Groundsole Dreaming Konsolidierungs-Zyklus aus."""
     print("🌙 Starte Groundsole Deep Dreaming Konsolidierungs-Zyklus...")
-
-    if not os.path.exists(LANGMEM_DB_PATH):
-        print(f"ℹ️ Keine Fakten-Datenbank unter {LANGMEM_DB_PATH} gefunden.")
-        return {"status": "no_memory_db"}
-
+    
     conn = sqlite3.connect(LANGMEM_DB_PATH)
-
-    # 1. Zeitlicher Verfall
+    
+    # 1. Zeitlicher Verfall (Expired State)
     expired = audit_temporal_decay(conn, apply_changes=apply_changes)
 
-    # 2. Semantische Clusterung & Widerspruchs-Audit
+    # 2. Semantische FastEmbed-Clusterung, Widerspruchs- & Redundanz-Audit
     cluster_res = audit_semantic_clusters_and_conflicts(conn, apply_changes=apply_changes)
     conn.close()
 
-    # 3. Knowledge Graph Synchronisation
+    # 3. Cognee Graph Synchronisation
     dep_keys = [d["older_key"] for d in cluster_res.get("deprecations", [])] + [r["older_key"] for r in cluster_res.get("redundancies", [])]
-    graph_res = audit_relational_graphs(deprecated_keys=dep_keys, apply_changes=apply_changes)
+    cognee_res = audit_cognee_graph(deprecated_keys=dep_keys, apply_changes=apply_changes)
 
-    # 4. DYNAMIC_STATE Entschlackung
+    # 4. Kopf-Dateien Entschlackung
     dynamic_res = prune_dynamic_state(apply_changes=apply_changes)
 
     mode_str = "APPLY (Änderungen geschrieben)" if apply_changes else "DRY-RUN (Nur Analyse)"
@@ -502,7 +551,7 @@ def run_dreaming(apply_changes: bool = False) -> Dict[str, Any]:
             status_tag = "✅ Konsolidiert" if apply_changes else "⚠️ Redundant"
             print(f"  • {status_tag}: '{r['older_key']}' (Sim: {r['score']:.2f}) -> Grund: {r['reason']}")
 
-    print(f"\n🕸️ Relationaler Graph: {graph_res.get('total_edges', 0)} Relationen überprüft ({graph_res.get('updated_edges', 0)} Kanten synchronisiert).")
+    print(f"\n🕸️ Cognee Graph: {cognee_res.get('total_edges', 0)} Relationen überprüft ({cognee_res.get('updated_edges', 0)} Kanten synchronisiert).")
     print(f"📄 DYNAMIC_STATE: {dynamic_res.get('pruned_milestones', 0)} alte Meilensteine entschlackt.")
     print("="*65 + "\n")
 
@@ -512,8 +561,9 @@ def run_dreaming(apply_changes: bool = False) -> Dict[str, Any]:
         "expired": len(expired),
         "deprecations": len(cluster_res.get("deprecations", [])),
         "redundancies": len(cluster_res.get("redundancies", [])),
-        "graph_updated": graph_res.get("updated_edges", 0)
+        "cognee_updated": cognee_res.get("updated_edges", 0)
     }
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Groundsole Deep Dreaming – Biophysikalische Gedächtnis-Konsolidierung")

@@ -5,11 +5,13 @@ Extrahiert autonom aus aufgelaufenen Puffer-Turns (alle N Turns oder bei --flush
 harte Fakten, Beschlüsse, Beträge und Beziehungen und überführt sie direkt nach
 LangMem (langmem_store.db) und Cognee (cognee_db).
 
-Kosten-Schutz: Verwendet isolierte One-Shot-Calls an Gemini Flash Lite (~0,0003 €).
+Multi-Provider: Unterstützt Gemini, OpenRouter, OpenAI, lokales Ollama oder Tier-1 In-Harness Modus.
 """
+
 
 import os
 import sys
+import re
 import json
 import sqlite3
 import urllib.request
@@ -18,25 +20,12 @@ import argparse
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple
 
-def find_workspace_root():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    workspace_root = os.path.dirname(script_dir)
-    if os.path.exists(os.path.join(workspace_root, "00_MEMORY")):
-        return workspace_root
-    workspace_root_framework = os.path.dirname(workspace_root)
-    if os.path.exists(os.path.join(workspace_root_framework, "00_MEMORY")):
-        return workspace_root_framework
-    if os.path.exists(os.path.join(os.getcwd(), "00_MEMORY")):
-        return os.getcwd()
-    return workspace_root
-
-REPO_ROOT = find_workspace_root()
-BUFFER_DB_PATH = os.path.join(REPO_ROOT, "00_MEMORY", "vectors", "memory_buffer.db")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BUFFER_DB_PATH = os.path.join(REPO_ROOT, "00_MEMORY", "emanuel_vectors", "memory_buffer.db")
 HERMES_ENV_PATH = os.path.expanduser("~/.hermes/.env")
 
 # Schnittstellen zu LangMem und Cognee importieren
 sys.path.insert(0, os.path.join(REPO_ROOT, "scripts"))
-sys.path.insert(0, os.path.join(REPO_ROOT, "tools", "scripts"))
 try:
     from memory import add_memory
 except ImportError:
@@ -48,28 +37,72 @@ except ImportError:
     add_edge = None
 
 
-def get_google_api_key() -> Optional[str]:
-    """Liest den Google API Key aus der Umgebung oder aus ~/.hermes/.env."""
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-    if key:
-        return key.strip()
+def get_inference_provider() -> Tuple[str, Optional[str], Optional[str], Optional[str]]:
+    """
+    Ermittelt die verfügbare Inferenz-Quelle:
+    - ("gemini", api_key, url, model)
+    - ("openai", api_key, url, model)
+    - ("ollama", None, url, model)
+    - ("none", None, None, None)
+    """
+    k_google = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    candidate_files = [
+        HERMES_ENV_PATH,
+        os.path.expanduser("~/.config/groundsole/.env"),
+        os.path.join(REPO_ROOT, ".env")
+    ]
+    if not k_google:
+        for cfile in candidate_files:
+            if os.path.exists(cfile):
+                try:
+                    with open(cfile, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if line.startswith("GOOGLE_API_KEY=") or line.startswith("GEMINI_API_KEY="):
+                                k_google = line.split("=", 1)[1].strip().strip("'\"")
+                                break
+                except Exception:
+                    pass
+            if k_google:
+                break
 
-    if os.path.exists(HERMES_ENV_PATH):
-        try:
-            with open(HERMES_ENV_PATH, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        k, v = line.split("=", 1)
-                        k = k.strip()
-                        if k in ("GOOGLE_API_KEY", "GEMINI_API_KEY"):
-                            val = v.strip().strip("'\"")
-                            if val:
-                                return val
-        except Exception as exc:
-            print(f"⚠️ Warnung: Konnte {HERMES_ENV_PATH} nicht lesen: {exc}", file=sys.stderr)
+    if k_google:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={k_google}"
+        return ("gemini", k_google, url, "gemini-2.5-flash")
 
-    return None
+    k_openrouter = os.environ.get("OPENROUTER_API_KEY")
+    k_openai = os.environ.get("OPENAI_API_KEY")
+    if not (k_openrouter or k_openai):
+        for cfile in candidate_files:
+            if os.path.exists(cfile):
+                try:
+                    with open(cfile, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if line.startswith("OPENROUTER_API_KEY="):
+                                k_openrouter = line.split("=", 1)[1].strip().strip("'\"")
+                            elif line.startswith("OPENAI_API_KEY="):
+                                k_openai = line.split("=", 1)[1].strip().strip("'\"")
+                except Exception:
+                    pass
+
+    if k_openrouter:
+        return ("openai", k_openrouter, "https://openrouter.ai/api/v1/chat/completions", "google/gemini-2.5-flash")
+    if k_openai:
+        return ("openai", k_openai, "https://api.openai.com/v1/chat/completions", "gpt-4o-mini")
+
+    try:
+        req = urllib.request.Request("http://localhost:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=0.2) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            models = [m.get("name") for m in data.get("models", [])]
+            if models:
+                return ("ollama", None, "http://localhost:11434/v1/chat/completions", models[0])
+    except Exception:
+        pass
+
+    return ("none", None, None, None)
+
 
 
 def init_crystallizer_schema(conn: sqlite3.Connection):
@@ -127,11 +160,12 @@ ANFORDERUNGEN:
 1. MAXIMAL 1 BIS 3 FAKTEN für das GESAMTE Dokument! (Nur die absoluten Kronjuwelen: Richtungsentscheidungen, tragende Leitprinzipien oder echte Heureka-Durchbrüche).
 2. Wenn das Gespräch lediglich routinemäßige Implementierung, CSS/UI-Polishing, Tippfehlerkorrekturen oder alltäglichen Arbeitsfortschritt behandelt: GIB LEERE LISTEN ZURÜCK ({"facts": [], "relations": []})!
 3. Was zählt als Fakt / Erkenntnis?
-   - Eine verbindliche Richtungsentscheidung des Nutzers (z.B. "Arbeitsweise X ab sofort verboten", "Tool Y ersetzt Tool Z").
+   - Eine verbindliche Richtungsentscheidung (z.B. "Arbeitsweise X ab sofort verboten", "Tool Y ersetzt Tool Z").
    - Ein fundamental verstandener Systemmechanismus oder Kausalzusammenhang (z.B. Prefix-Caching, deterministische Kognition).
    - Ein Heureka-Moment mit starker Resonanz ("Krass!", "WOW!", "Das ist der Kern!").
-4. Formuliere zeitlos, prägnant und als kausalen Lehrsatz. Keine Chat-Nacherzählungen ("Der Nutzer sagte...").
+4. Formuliere zeitlos, prägnant und als kausalen Lehrsatz. Keine Chat-Nacherzählungen ("Nutzer sagte...").
 5. Maximal 1 bis 3 Relationen für Cognee (nur zwischen den Kernentitäten).
+
 
 Antworte zwingend im folgenden JSON-Format:
 {
@@ -144,7 +178,7 @@ Antworte zwingend im folgenden JSON-Format:
   ],
   "relations": [
     {
-      "source": "Subjekt (z.B. Nutzer oder System)",
+      "source": "Subjekt (z.B. Emanuel)",
       "relationship": "VERBINDUNG (z.B. ERKENNT, BESCHLIESST)",
       "target": "Objekt (z.B. Deterministische_Kognition)",
       "source_type": "Person | Konzept | System",
@@ -155,55 +189,81 @@ Antworte zwingend im folgenden JSON-Format:
 """
 
 
-def call_gemini_extraction(api_key: str, turns_text: str) -> Optional[Dict[str, Any]]:
-    """Sendet den Textblock an Gemini Flash Lite via Standard-REST (ohne externe Libs)."""
-    models = ["gemini-3.5-flash-lite", "gemini-2.5-flash"]
-    
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": EXTRACTION_PROMPT + "\n\n### ZU ANALYSIERENDER GESPRÄCHSABSCHNITT:\n" + turns_text}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.1,
-            "responseMimeType": "application/json"
-        }
-    }
-    
-    data_bytes = json.dumps(payload).encode("utf-8")
-    
-    for model in models:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-        req = urllib.request.Request(
-            url,
-            data=data_bytes,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                result = json.loads(resp.read().decode("utf-8"))
-                candidates = result.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts and "text" in parts[0]:
-                        raw_json = parts[0]["text"]
-                        return json.loads(raw_json)
-        except urllib.error.HTTPError as e:
-            err_msg = e.read().decode("utf-8", errors="ignore")
-            # Bei 404 nächstes Modell versuchen
-            if e.code == 404:
-                continue
-            print(f"⚠️ Gemini API Fehler ({model}, HTTP {e.code}): {err_msg}", file=sys.stderr)
-            break
-        except Exception as exc:
-            print(f"⚠️ Netzwerk-/Parsing-Fehler bei Modell {model}: {exc}", file=sys.stderr)
-            break
+def call_extraction_llm(turns_text: str) -> Optional[Dict[str, Any]]:
+    """Sendet den Textblock an das konfigurierte Modell (Gemini, OpenRouter, OpenAI oder Ollama)."""
+    provider, key, url, model = get_inference_provider()
+    if provider == "none" or not url:
+        return None
 
-    return None
+    prompt = EXTRACTION_PROMPT + "\n\n### ZU ANALYSIERENDER GESPRÄCHSABSCHNITT:\n" + turns_text
+
+    if provider == "gemini":
+        models = [model, "gemini-3.5-flash-lite", "gemini-2.5-flash"]
+        for m in models:
+            m_url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={key}"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt}
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "responseMimeType": "application/json"
+                }
+            }
+            try:
+                req = urllib.request.Request(
+                    m_url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    result = json.loads(resp.read().decode("utf-8"))
+                    candidates = result.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts and "text" in parts[0]:
+                            raw_json = parts[0]["text"]
+                            return json.loads(raw_json)
+            except urllib.error.HTTPError as e:
+                err_msg = e.read().decode("utf-8", errors="ignore")
+                if e.code == 404:
+                    continue
+                print(f"⚠️ Gemini API Fehler ({m}, HTTP {e.code}): {err_msg}", file=sys.stderr)
+                break
+            except Exception as exc:
+                print(f"⚠️ Netzwerk-/Parsing-Fehler bei Modell {m}: {exc}", file=sys.stderr)
+                break
+        return None
+    else:
+        # OpenAI, OpenRouter oder Ollama
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.1,
+            "response_format": {"type": "json_object"}
+        }
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers=headers,
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                raw_text = data["choices"][0]["message"]["content"].strip()
+                return json.loads(raw_text)
+        except Exception as exc:
+            print(f"⚠️ Extraktions-Fehler ({provider} - {model}): {exc}", file=sys.stderr)
+            return None
 
 
 def run_crystallization(
@@ -249,18 +309,19 @@ def run_crystallization(
             if count < threshold and not flush:
                 continue
 
-            api_key = get_google_api_key()
-            if not api_key:
-                print("❌ Fehler: Kein Google/Gemini API Key in der Umgebung oder ~/.hermes/.env gefunden.", file=sys.stderr)
+            provider, key, url, model = get_inference_provider()
+            if provider == "none":
+                print("ℹ️ Kein externer API-Key (Gemini/OpenRouter/OpenAI/Ollama) konfiguriert.\n"
+                      "   Tier-1 In-Harness Modus aktiv: Kronjuwelen-Fakten werden beim Archivieren direkt im Chat extrahiert.", file=sys.stderr)
                 return total_saved_facts
 
-            print(f"⚡ Kristallisiere {count} Turns aus {target_session}...")
+            print(f"⚡ Kristallisiere {count} Turns aus {target_session} ({provider} - {model})...")
 
             # Textblock für LLM aufbereiten
             text_lines = []
             max_chunk_id = last_id
             for c in pending_chunks:
-                speaker_tag = "User" if c["speaker"] == "user" else "Assistant"
+                speaker_tag = "Emanuel" if c["speaker"] == "user" else "Hermes"
                 text_lines.append(f"[{speaker_tag} - Turn {c['turn_index']}]:\n{c['content']}\n")
                 if c["id"] > max_chunk_id:
                     max_chunk_id = c["id"]
@@ -268,9 +329,9 @@ def run_crystallization(
             combined_text = "\n---\n".join(text_lines)
 
             # Extraktions-Call via REST
-            extracted = call_gemini_extraction(api_key, combined_text)
+            extracted = call_extraction_llm(combined_text)
             if not extracted:
-                print("⚠️ Keine strukturierten Daten von Gemini erhalten.")
+                print(f"⚠️ Keine strukturierten Daten vom Modell ({provider}) erhalten.")
                 continue
 
             facts = extracted.get("facts", [])
@@ -363,9 +424,10 @@ def crystallize_transcript(transcript_path: str, dry_run: bool = False) -> int:
         print(f"❌ Transkript existiert nicht: {transcript_path}")
         return 0
 
-    api_key = get_google_api_key()
-    if not api_key:
-        print("❌ Kein API Key gefunden.", file=sys.stderr)
+    provider, key, url, model = get_inference_provider()
+    if provider == "none":
+        print("ℹ️ Kein externer API-Key (Gemini/OpenRouter/OpenAI/Ollama) konfiguriert.\n"
+              "   Tier-1 In-Harness Modus aktiv: Kronjuwelen-Fakten werden beim Archivieren direkt im Chat extrahiert.", file=sys.stderr)
         return 0
 
     fname = os.path.basename(transcript_path)
@@ -384,12 +446,12 @@ def crystallize_transcript(transcript_path: str, dry_run: bool = False) -> int:
     else:
         analyzed_text = content
 
-    print(f"💎 Kristallisiere archiviertes Transkript: {fname} (Gesamtschau)...")
+    print(f"💎 Kristallisiere archiviertes Transkript: {fname} ({provider} - {model})...")
 
     total_facts = 0
     total_relations = 0
 
-    extracted = call_gemini_extraction(api_key, analyzed_text)
+    extracted = call_extraction_llm(analyzed_text)
     if not extracted:
         extracted = {"facts": [], "relations": []}
 
@@ -432,6 +494,125 @@ def crystallize_transcript(transcript_path: str, dry_run: bool = False) -> int:
     return total_facts
 
 
+def update_dynamic_state_deterministic(force: bool = False) -> bool:
+    """
+    Aktualisiert DYNAMIC_STATE.md rein deterministisch (0 Tokens, 0 LLM-Kosten):
+    1. Bewahrt den statischen Kopfbereich (Nordstern & Leitplanken).
+    2. Prüft das Revisionsdatum (Weg A): Wenn überfällig, setzt es einen dezenten Hinweis-Banner.
+    3. Liest die neuesten 10 Einträge aus langmem_store.db.
+    4. Liest die echten Zähler aus SQLite & Transkripten.
+    """
+    dynamic_state_path = os.path.join(REPO_ROOT, "00_MEMORY", "DYNAMIC_STATE.md")
+    langmem_db_path = os.path.join(REPO_ROOT, "00_MEMORY", "langmem_store.db")
+    transcripts_dir = os.path.join(REPO_ROOT, "00_MEMORY", "transcripts")
+    summaries_dir = os.path.join(REPO_ROOT, "00_MEMORY", "summaries")
+
+    if not os.path.exists(dynamic_state_path):
+        return False
+
+    with open(dynamic_state_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. Neueste 10 Fakten aus LangMem lesen
+    recent_facts = []
+    if os.path.exists(langmem_db_path):
+        try:
+            conn = sqlite3.connect(langmem_db_path)
+            c = conn.cursor()
+            c.execute("SELECT namespace, key, timestamp, content FROM memories ORDER BY id DESC LIMIT 10")
+            for r in c.fetchall():
+                ts = r[2].split("T")[0] if "T" in r[2] else r[2][:10]
+                # Bereinige Inhalt auf eine Zeile
+                clean_content = " ".join(r[3].splitlines()).strip()
+                recent_facts.append(f"- **[{r[0]}:{r[1]}]** ({ts}): {clean_content}")
+            conn.close()
+        except Exception as exc:
+            print(f"⚠️ Warnung beim Lesen von LangMem: {exc}", file=sys.stderr)
+
+    # 2. Quellen-Zähler ermitteln
+    total_files = 0
+    first_date = "2023-09-07"
+    last_date = datetime.now().strftime("%Y-%m-%d")
+    total_mb = 0.0
+
+    if os.path.exists(transcripts_dir):
+        files = [f for f in os.listdir(transcripts_dir) if f.endswith(".md")]
+        total_files = len(files)
+        total_size = sum(os.path.getsize(os.path.join(transcripts_dir, f)) for f in files)
+        total_mb = total_size / (1024 * 1024)
+        dates = []
+        for f in files:
+            m = re.match(r"^(\d{4}-\d{2}-\d{2})", f)
+            if m:
+                dates.append(m.group(1))
+        if dates:
+            dates.sort()
+            first_date = dates[0]
+            last_date = dates[-1]
+
+    # 3. Revisions-Prüfung (Weg A): Ist der Nordstern überfällig?
+    today = datetime.now().date()
+    # Standard: Nächste Rekalibrierung in 40 Tagen, falls noch nicht definiert
+    rev_pattern = r"\*\*Nächste strategische Rekalibrierung:\*\*.*?(\d{4}-\d{2}-\d{2})"
+    rev_match = re.search(rev_pattern, content)
+    
+    overdue_banner = ""
+    target_rev_date_str = "2026-11-15"
+    if rev_match:
+        target_rev_date_str = rev_match.group(1)
+        try:
+            target_rev_date = datetime.strptime(target_rev_date_str, "%Y-%m-%d").date()
+            if today >= target_rev_date:
+                overdue_banner = f"> [!IMPORTANT]\n> **STRATEGISCHE REKALIBRIERUNG ÜBERFÄLLIG (Fälligkeit: {target_rev_date_str})!**\n> Bitte prüfe mit Emanuel beim Session-Start oder via Skill `meta-zoom`, ob der strategische Nordstern und die Projektachsen ein kurzes Update benötigen.\n\n"
+        except Exception:
+            pass
+
+    # 4. Zusammenbau des deterministischen Abschnitts
+    facts_block = "\n".join(recent_facts) if recent_facts else "- *Keine Einträge vorhanden.*"
+
+    deterministic_section = (
+        "## 2. Letzte 10 kristallisierte Fakten & Meilensteine (Auto-Sync)\n\n"
+        f"{facts_block}\n\n"
+        "## 3. Deterministische Datenquellen (SSOT)\n\n"
+        "- **Vektorgedächtnis:** Multi-DB SQLite in `00_MEMORY/vectors/` (Archiv + Active + Memory-Buffer).\n"
+        "- **Fakten- & Wissensgraph-Speicher:** Lokales LangMem (`00_MEMORY/langmem_store.db`) und Cognee (`00_MEMORY/cognee_db`).\n\n"
+        "## Quellenlage\n\n"
+        f"Primaerquellen: Rohchats in `00_MEMORY/transcripts/` ({total_files} Dateien im ISO-Format `YYYY-MM-DD`, Zeitraum von {first_date} bis {last_date}, ca. {total_mb:.1f} MB).\n"
+    )
+
+    # 5. Kopfbereich isolieren (bis zu '## 2.')
+    head_pattern = r"^(.*?)(?=## 2\. Letzte 10|## 2\. Deterministische|$)"
+    match = re.search(head_pattern, content, flags=re.DOTALL)
+    head_content = match.group(1).strip() if match else content.strip()
+
+    # Revisions-Zeile im Header sicherstellen
+    if "**Nächste strategische Rekalibrierung:**" not in head_content:
+        # Nach **Strategischer Fokus:** oder nach **Aktueller Stand:** einfügen
+        head_content = re.sub(
+            r"(\*\*Aktueller Stand:\*\*.*?\n)",
+            r"\1**Nächste strategische Rekalibrierung:** ~ Mitte November 2026 (spätestens 2026-11-15)\n",
+            head_content
+        )
+
+    # Banner oben einfügen oder aktualisieren
+    head_clean = re.sub(r"> \[!IMPORTANT\]\n> \*\*STRATEGISCHE REKALIBRIERUNG ÜBERFÄLLIG.*?\n\n", "", head_content, flags=re.DOTALL)
+    if overdue_banner:
+        # Direkt nach H1 einfügen
+        head_clean = re.sub(r"(# DYNAMIC STATE[^\n]*\n+)", r"\1" + overdue_banner, head_clean)
+
+    # Alle trailing Trenner am Ende des Kopfbereichs strikt entfernen
+    while head_clean.endswith("---") or head_clean.endswith("\n") or head_clean.endswith("-"):
+        head_clean = re.sub(r"[\s\n-]*---\s*$", "", head_clean).strip()
+
+    new_full_content = head_clean.strip() + "\n\n---\n\n" + deterministic_section
+
+    with open(dynamic_state_path, "w", encoding="utf-8") as f:
+        f.write(new_full_content)
+
+    print(f"🎯 DYNAMIC_STATE.md erfolgreich deterministisch aktualisiert ({total_files} Transkripte, 10 Fakten).")
+    return True
+
+
 def scan_and_crystallize_transcripts(limit: int = 5, dry_run: bool = False) -> int:
     """Scannt 00_MEMORY/transcripts/ nach noch unkristallisierten Transkripten."""
     transcripts_dir = os.path.join(REPO_ROOT, "00_MEMORY", "transcripts")
@@ -448,12 +629,15 @@ def scan_and_crystallize_transcripts(limit: int = 5, dry_run: bool = False) -> i
 
     if not pending:
         print("✅ Alle archivierten Transkripte sind bereits in LangMem & Cognee kristallisiert.")
+        update_dynamic_state_deterministic()
         return 0
 
     print(f"🔍 Gefunden: {len(pending)} unkristallisierte(s) Transkript(e). Starte Extraktion...")
     total = 0
     for p in pending:
         total += crystallize_transcript(p, dry_run=dry_run)
+    
+    update_dynamic_state_deterministic()
     return total
 
 
@@ -464,11 +648,15 @@ if __name__ == "__main__":
     parser.add_argument("--session", type=str, default=None, help="Gezielte Puffer-Session (z. B. harness_hermes_123.md)")
     parser.add_argument("--transcript", type=str, default=None, help="Kristallisiert ein spezifisches archiviertes Transkript")
     parser.add_argument("--scan-transcripts", action="store_true", help="Scannt 00_MEMORY/transcripts/ nach neuen Sitzungen")
+    parser.add_argument("--update-state", action="store_true", help="Aktualisiert DYNAMIC_STATE.md rein deterministisch (0 Tokens)")
     parser.add_argument("--dry-run", action="store_true", help="Gibt die Extraktion nur auf stdout aus")
     args = parser.parse_args()
 
-    if args.transcript:
+    if args.update_state:
+        update_dynamic_state_deterministic()
+    elif args.transcript:
         crystallize_transcript(args.transcript, dry_run=args.dry_run)
+        update_dynamic_state_deterministic()
     elif args.scan_transcripts:
         scan_and_crystallize_transcripts(dry_run=args.dry_run)
     else:
@@ -478,3 +666,5 @@ if __name__ == "__main__":
             session_file=args.session,
             dry_run=args.dry_run
         )
+        update_dynamic_state_deterministic()
+

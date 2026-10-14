@@ -79,7 +79,14 @@ Every session transcript saved to `00_MEMORY/transcripts/` must strictly adhere 
 4. **Incremental Vector Ingestion:**  
    Index new transcript into the appropriate database shard.
 5. **Deterministic State Synchronization & Memory Crystallization:**  
-   Run deterministic memory crystallization and update `DYNAMIC_STATE.md`.
+   - **Tier 1 (In-Harness Mode / Zero-API Default):**  
+     For users without external API keys (e.g. using chat subscriptions like Claude Pro, ChatGPT Plus, Antigravity, or Cursor), the active chat model autonomously extracts 1 to 3 crown-jewel facts (Signal over Noise: core decisions, eureka insights, biophysical architectural shifts) during the archiving turn and commits them deterministically:  
+     `python3 tools/scripts/memory.py add <Namespace> <Key> "<Content>"`
+   - **Tier 2 (Background Multi-Provider Pipeline):**  
+     When API keys (Gemini, OpenRouter, OpenAI) or a local Ollama instance are configured, run:  
+     `python3 tools/scripts/crystallize_memory.py --scan-transcripts`  
+     This extracts facts into LangMem and Cognee knowledge graphs in the background without burning chat context.
+   - Synchronize `DYNAMIC_STATE.md` with updated facts and sources.
 6. **Mandatory Post-Archiving Quality Control (QC) & Report:**  
    Perform verification checklist and present structured QC report:
    - **Speaker Integrity:** Verify human speaker headers use valid format.
