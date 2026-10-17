@@ -88,4 +88,4 @@ Jede Regel in `STYLE_AND_GUARDRAILS.md` MUSS zwingend das folgende Standard-Form
 | **Tool-Workflow in S_&_G** (*„Nutze yt-dlp für YouTube“*) | Bläht den Systemprompt für alle Nicht-YouTube-Prompts auf. | Eigener Skill: `.agents/skills/youtube-transcript/` |
 | **Verbot ohne Kausalität** (*„Fasse dich kurz“*) | Modell ignoriert das Verbot unter Kontextsättigung. | Kausalität ergänzen (*„Begründung: Schützt das Token-Budget...“*) |
 | **Vollständiges Überschreiben** (`write_to_file`) | Zerstört manuelle Anpassungen und Struktur des Nutzers. | Punktuelle Modifikation mit `replace_file_content` |
-| **Projektstatus in S_&_G** (*„Fernitz Angebot ist offen“*) | S_&_G verliert Allgemeingültigkeit; Veraltet sofort. | Nach `00_MEMORY/DYNAMIC_STATE.md` verschieben |
+| **Projektstatus in S_&_G** (*„Kunden-Angebot B ist offen“*) | S_&_G verliert Allgemeingültigkeit; Veraltet sofort. | Nach `00_MEMORY/DYNAMIC_STATE.md` verschieben |

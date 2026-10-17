@@ -389,6 +389,29 @@ def main():
     else:
         print("ℹ️  Skill commands: no skill tree found to check.")
 
+    # Startup Token Budget Check (ETH Token-Tax Guard / guardrails-sop Gate 4)
+    budget_limits = [
+        (root_dir / "AGENTS.md", 35, 2500),
+        (root_dir / "00_MEMORY" / "STYLE_AND_GUARDRAILS.md", 75, 12000),
+        (root_dir / "templates" / "AGENTS.md", 35, 2500),
+        (root_dir / "templates" / "STYLE_AND_GUARDRAILS.md", 75, 12000),
+    ]
+    budget_violations = []
+    for b_file, max_lines, max_bytes in budget_limits:
+        if b_file.exists():
+            lines_count = len(b_file.read_text(encoding="utf-8").splitlines())
+            bytes_count = b_file.stat().st_size
+            if lines_count > max_lines or bytes_count > max_bytes:
+                budget_violations.append((b_file, lines_count, max_lines, bytes_count, max_bytes))
+
+    if budget_violations:
+        has_errors = True
+        print(f"\n⚠️  Startup Token-Budget Exceeded ({len(budget_violations)}):")
+        for bf, lc, ml, bc, mb in budget_violations:
+            print(f"   • [{bf.name}] {lc}/{ml} lines, {bc}/{mb} bytes (guardrails-sop Gate 4)")
+    else:
+        print("✅ Startup Token-Budget: AGENTS.md and STYLE_AND_GUARDRAILS.md are within lean token limits.")
+
     print("=" * 60)
     
     if has_errors:

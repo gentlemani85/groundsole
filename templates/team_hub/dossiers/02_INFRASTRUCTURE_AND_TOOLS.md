@@ -23,4 +23,4 @@
 ## 3. Approved Software & AI Toolchain
 - **Agentic Harness Runners:** [Hermes Agent Desktop, Antigravity Desktop, etc.]
 - **Inference Providers & Endpoints:** [Enterprise cloud APIs, regional endpoints, approved models]
-- **Credential Storage:** [Corporate secret manager, e.g. Passbolt / Bitwarden / 1Password]
+- **Credential Storage:** [Corporate secret manager, e.g. Enterprise Vault / Bitwarden / 1Password]

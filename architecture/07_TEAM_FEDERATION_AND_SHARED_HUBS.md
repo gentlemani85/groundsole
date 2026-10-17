@@ -53,7 +53,7 @@ Groundsole resolves this tension through **Two-Tier Hub-and-Spoke Federation**, 
 ```
 
 ### Tier 1: The Personal Home Port (Der Persönliche Heimathafen)
-- **Zero Exposure:** The daily launch workspace for the harness (e.g. `ISN-AI/` in personal OneDrive or local SSD).
+- **Zero Exposure:** The daily launch workspace for the harness (e.g. `TEAM-AI/` in personal cloud drive or local SSD).
 - **Private Working Memory:** Raw session transcripts (`00_MEMORY/transcripts/`), scratchpads, and personal todo lists remain 100% private to the user.
 - **Root Entry Point:** The local `AGENTS.md` implements the Minimal Core Triad and defines an immutable pointer to the shared team hub.
 
