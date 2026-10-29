@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Public_Release-emerald.svg)](https://github.com/gentlemani85/groundsole)
 
-> **Das geerdete Betriebssystem für souveräne KI-Koprozessoren.**  
+> **Das geerdete Betriebssystem für souveräne, persönliche KI-Koprozessoren.**  
 > *Biophysikalische Kausalität, Markdown-SSOT, Multi-DB Gedächtnis-Sharding und radikale Tool-Neutralität.*
 
 [🇬🇧 English Edition](README.md)
@@ -12,20 +12,18 @@
 
 ## 💡 Was ist Groundsole? (Auf den Punkt gebracht)
 
-### Die Ausgangslage: Vom isolierten Chat-Fenster zum persistenten Arbeitsraum
+### Die Ausgangslage: Vom isolierten Chat-Fenster zum persistenten persönlichen Kognitions-Organ
 Bisher nutzen die meisten Menschen KI über **Webchats im Browser** oder isolierte Chatfenster. Diese Nutzung ist fragmentiert: Für jedes Thema wird ein neuer Chat aufgemacht, das Modell vergisst den Kontext nach dem Schließen, und der Nutzer fängt immer wieder bei null an.
 
-Selbst moderne **Agentic Harnesses** (wie *Claude Code*, *Google Antigravity*, *Hermes Agent* oder *Cursor*), die direkt auf dem Rechner laufen und Dateien bearbeiten können, lösen dieses Problem nicht von selbst: Ihre internen Gedächtnisse bleiben im jeweiligen Tool gefangen, eine gemeinsame teamweite Arbeitsumgebung fehlt, und die Interaktion bleibt oft auf punktuelle Code-Aufgaben beschränkt.
+Selbst moderne **Agentic Harnesses** (wie *Google Antigravity*, *Hermes Agent*, *Goose*, *Claude Code* oder *Cursor*), die direkt auf dem Rechner laufen und Dateien bearbeiten können, lösen dieses Problem nicht von selbst: Ihre internen Gedächtnisse bleiben im jeweiligen Tool gefangen, sitzungsübergreifende Kontinuität fehlt, und die Interaktion bleibt oft auf punktuelle Code-Aufgaben beschränkt.
 
-### Die Lösung: Groundsole ist das Betriebssystem für deinen KI-Koprozessor
-**Groundsole verwandelt isolierte KI-Werkzeuge in eine durchgehende, dauerhafte Arbeitsumgebung mit einem Gegenüber, das deinen gesamten Kontext teilt.** Es liefert die offene Architektur, damit eine KI nicht als flüchtiger Chatbot agiert, sondern als echter Koprozessor auf Augenhöhe:
+### Die Lösung: Groundsole ist das Betriebssystem für deinen persönlichen KI-Koprozessor
+**Groundsole verwandelt isolierte KI-Werkzeuge in eine durchgehende, lebenslange Denkumgebung mit einem Gegenüber, das deinen gesamten Kontext teilt.** Es liefert die offene Architektur, damit eine KI nicht als flüchtiger Chatbot agiert, sondern als echtes persönliches Kognitions-Organ auf Augenhöhe:
 
 1. **Ein durchgehender Gedächtnisstrom statt Themen-Silos:** Du musst deine Gedanken nicht mehr in 50 getrennte Themen-Ordner oder Spezial-Bots einsperren („Bot für Projekt A, Chat für Steuern, Chat für Privates“). Du arbeitest frei von Themen-Grenzen in natürlichen Arbeits-Episoden. Sobald eine Session abgeschlossen und über `stream-archive` eingefroren wird, kristallisiert die Groundsole-Architektur (über semantische Vektoren, Fakten-Extraktion und nächtliches `dreaming.py`) das Wissen im Hintergrund an die richtigen Orte. Du startest jede neue Session mit einem frischen, schnellen Kontextfenster – und dein Gegenüber weiß durch deterministisches Retrieval dennoch sofort, worum es geht.
 2. **Ein echtes Gegenüber (Koprozessor auf Augenhöhe):** Dein KI-Partner kennt deine Historie, deine echten Projektstände, Verträge und Richtlinien. Er denkt mit, prüft biophysikalische Kausalitäten und widerlegt unvollständige Annahmen, statt dir bloß nach dem Mund zu reden.
-3. **Geteilte Wissensräume ohne Bruch (Team & Partnerschaft):** Kognitions-Hubs liegen dezentral direkt in den jeweiligen Ordnern (`.agents/`). Mehrere Menschen und unterschiedliche KI-Systeme können parallel auf demselben realen Datenstand arbeiten, ohne sich gegenseitig zu blockieren oder Abhängigkeiten zu erzeugen.
-4. **Vollkommene Tool- und Modell-Neutralität (Souveränität):** Dein Kontext und deine Geschichte liegen in offenen Textformaten (Markdown) und lokalen SQLite-Datenbanken direkt auf deiner Festplatte – nicht in einem Cloud-Silo. Du kannst heute mit Claude Code arbeiten, morgen in Hermes Agent wechseln und übermorgen ein lokales Open-Source-Modell (wie Mistral oder Llama) nutzen: Dein Gegenüber bleibt dasselbe.
-5. **Local-First AI Architektur:** Groundsole folgt konsequent dem **Local-First AI Manifest**. Daten, Gedächtnis, Werkzeuge und Ausführung laufen auf deinem eigenen Rechner. Das Cloud-LLM wird als austauschbarer „Inferenz-Strom“ (Commodity) genutzt. Organisationen und Menschen bauen eigene, dauerhafte digitale Assets auf, anstatt geschlossene SaaS-Portale zu mieten.
-
+3. **Vollkommene Tool- und Modell-Neutralität (Souveränität):** Dein Kontext und deine Geschichte liegen in offenen Textformaten (Markdown) und lokalen SQLite-Datenbanken direkt auf deiner Festplatte – nicht in einem Cloud-Silo. Du kannst heute mit Claude Code arbeiten, morgen in Goose oder Hermes Agent wechseln und übermorgen ein lokales Open-Source-Modell (wie Mistral oder Llama) nutzen: Dein Gegenüber bleibt dasselbe.
+4. **Local-First AI Architektur:** Groundsole folgt konsequent dem **Local-First AI Manifest**. Daten, Gedächtnis, Werkzeuge und Ausführung laufen auf deinem eigenen Rechner. Das Cloud-LLM wird als austauschbarer „Inferenz-Strom“ (Commodity) genutzt. Du baust ein eigenes, zu 100 % selbst besessenes digitales Asset auf, anstatt geschlossene SaaS-Portale zu mieten.
 
 ---
 
@@ -81,31 +79,25 @@ groundsole/
 │   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB Sharding & lokale SSD vs. Cloud-Sync
 │   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Stufen-Governance & abgeleitete Views
 │   ├── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-neutraler Einstieg & Minimal Core Triad
-│   ├── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Zwei-Ebenen-Föderation & Brownfield-Adoption
 │   └── 08_CONTEXT_FILTERING_AND_DREAMING_CONSOLIDATION.md # Zero-Spill Context-Filter & Deep Dreaming Engine
 ├── templates/                         # Saubere Arbeits-Vorlagen
 │   ├── AGENTS.md                      # Universeller Agenten-Einstiegspunkt (Minimal Core Triad)
-│   ├── index.md                       # Primärer Gedächtnis-Index
-│   ├── LOAD_ORDER.md                  # Minimale Session-Ladeordnung (Legacy-Fallback)
 │   ├── STYLE_AND_GUARDRAILS.md        # Koprozessor-Tonalität & Kausalitätsprüfung
-│   ├── DYNAMIC_STATE.md               # Lebendiger Tages- und Projektfokus
+│   ├── DYNAMIC_STATE.md               # Lebendiger Tages- und Projektfokus & Modul-Zeiger
 │   ├── bootstrap.md                   # Ausführender Master-Bootstrap-Prompt
-│   ├── team_hub/                      # Geteilte Firmen-Hub-Vorlagen (SharePoint/Cloud)
-│   ├── team_spoke/                    # Persönlicher Heimathafen mit Pointer auf den Hub
 │   └── modules/                       # Universelle Fach- und Lebensbereichs-Module
 │       ├── OPERATIONS_AND_PROJECTS.md # Projekte, Aufgaben, Meilensteine
 │       ├── RESOURCES_AND_FINANCE.md   # Liquidität, Budgets, Verträge
 │       ├── INFRASTRUCTURE_AND_ASSETS.md# Rechner, Tools, Betriebsumgebung
 │       └── LEARNING_AND_SKILLS.md     # Fächer, Lehrpläne, Kompetenzaufbau
-├── skills/                            # Vorkonfigurierte Groundsole-Skills
+├── skills/                            # Groundsole Kern-Skills
 │   ├── stream-archive/                # Bereinigt, signiert und friert Chats in Transkripte ein
 │   ├── memory-engine/                 # Autonome Speicherpersistenz, Retrieval & Dreaming Engine
 │   ├── memory-recall/                 # Föderierte Suche über Vektoren, Graph, Fakten & Text
-│   ├── document-export/               # Exportiert Markdown in Word (.docx) und druckreifes PDF (.pdf)
-│   ├── presentation-deck/             # Autarke interaktive 16:9 HTML-Präsentationen
+│   ├── space-sync/                    # Autonomer Synchronisierer für lokale Dokumente & Fachräume
+│   ├── grounding-core/                # Kognitives Schutzschild gegen Entitäts-Postulierungen & Bias
+│   ├── guardrails-sop/                # Standard Operating Procedure für Verfassungs- & Kernänderungen
 │   ├── groundsole-onboarding/         # Kognitives Onboarding & interaktives Tutorial
-│   ├── space-sync/                    # Deterministischer Delta-Abgleich geteilter Team-Spaces
-│   ├── mail-manager/                  # Prüft und versendet E-Mails via IMAP/SMTP (Gmail, Outlook)
 │   ├── system-hygiene/                # Entropie-Senkung, Cache-Bereinigung & Link-Prüfung
 │   └── inbox-triage/                  # Deterministische Verarbeitung von Dateien in Inbox/
 └── tools/                             # Automatisierung & Ausführungs-Engines
@@ -113,20 +105,18 @@ groundsole/
     ├── check_update.py                # Dezentraler GitHub-Update-Checker
     └── scripts/                       # Die Python-Kern-Engines
         ├── memory.py                  # Key-Value Faktenspeicher mit Cloud-Konflikt-Schutz & Gatekeeping
-        ├── memory_indexer.py          # FastEmbed Jina ONNX Transkript-Vektor-Indexer
+        ├── memory_indexer.py          # FastEmbed Jina ONNX multi-harness Vektor-Indexer
         ├── memory_retriever.py        # Multi-DB föderierte semantische Suchmaschine
         ├── crystallize_memory.py      # Post-Archival Fakten- & Graph-Kristallisation (Gemini Flash Lite)
         ├── dreaming.py                # Deep Dreaming biophysikalische Gedächtniskonsolidierung & Verfall
+        ├── export_session.py          # Universeller Zero-Token Session-Exporter (Antigravity, Hermes, Goose, Claude Code)
         ├── context_filter_mcp.py      # Zero-Spill Terminal & Web MCP-Proxy mit SQLite FTS5
-        ├── cockpit.py                 # Plattformneutrale lokale Web-Zentrale & dynamischer App-Launcher
-        ├── export_hermes_session.py   # Verlustfreier Zero-Token Hermes-Session-Exporter (SQLite)
-
-        ├── export_antigravity_session.py # Zero-Token Antigravity-Session-Exporter (JSONL)
+        ├── cockpit.py                 # Plattform-agnostisches lokales Web-Cockpit
         ├── knowledge_graph.py         # Zero-API relationaler Wissensgraph (SQLite)
-        ├── check_integrity.py         # Zero-Dependency Link-, Modul- & Konsistenz-Linter
-        ├── document_exporter.py       # Word- (.docx) und PDF-Generator
-        └── mail_helper.py             # E-Mail-Assistent für Gmail & IMAP/SMTP
+        └── check_integrity.py         # Link-, Modul- und Integritäts-Linter
 ```
+
+> 📦 **Optionale Erweiterungen (Extensions):** Spezialisierte Anwendungs-Skills (wie Dokumenten-Export, Präsentations-Decks, Mail-Manager, OCR und Scraper) werden separat in [groundsole-extensions](https://github.com/gentlemani85/groundsole-extensions) gepflegt.
 
 ---
 

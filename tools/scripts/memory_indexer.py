@@ -372,6 +372,163 @@ def collect_hermes_chunks(limit_sessions: int = 20) -> Optional[List[Dict]]:
     return turns
 
 
+def collect_goose_chunks(limit_sessions: int = 15) -> Optional[List[Dict]]:
+    """Reads turns from local Goose sessions SQLite database (~/.local/share/goose/sessions/sessions.db)."""
+    goose_db = os.path.expanduser("~/.local/share/goose/sessions/sessions.db")
+    if not os.path.exists(goose_db):
+        return None
+
+    turns: List[Dict] = []
+    conn = sqlite3.connect(f"file:{goose_db}?mode=ro", uri=True, timeout=10)
+    try:
+        cursor = conn.cursor()
+        sessions = cursor.execute(
+            """
+            SELECT id, updated_at, description, name
+            FROM sessions
+            WHERE archived_at IS NULL
+            ORDER BY updated_at DESC
+            LIMIT ?
+            """,
+            (limit_sessions,),
+        ).fetchall()
+
+        for session_id, updated_at, _desc, _name in sessions:
+            date_str = str(updated_at)[:10] if updated_at else datetime.now().strftime("%Y-%m-%d")
+            rows = cursor.execute(
+                """
+                SELECT role, content_json
+                FROM messages
+                WHERE session_id = ? AND role IN ('user', 'assistant')
+                ORDER BY id ASC
+                """,
+                (session_id,),
+            ).fetchall()
+
+            for role, content_json in rows:
+                if not content_json:
+                    continue
+                text_content = ""
+                try:
+                    parsed = json.loads(content_json)
+                    if isinstance(parsed, list):
+                        parts = [item.get("text", "") for item in parsed if isinstance(item, dict) and item.get("type") == "text"]
+                        text_content = "\n".join(parts).strip()
+                    elif isinstance(parsed, dict) and parsed.get("type") == "text":
+                        text_content = parsed.get("text", "")
+                except Exception:
+                    continue
+
+                if not text_content:
+                    continue
+                cleaned = clean_harness_text(text_content)
+                if len(cleaned) < MIN_TURN_CHARS:
+                    continue
+                turns.append({
+                    "speaker": role,
+                    "content": cleaned,
+                    "date_str": date_str,
+                    "session_id": str(session_id),
+                })
+    finally:
+        conn.close()
+    return turns
+
+
+def collect_claude_code_chunks(limit_sessions: int = 15) -> Optional[List[Dict]]:
+    """Reads turns from Claude Code CLI sessions (~/.claude/projects/)."""
+    claude_projects_dir = os.path.expanduser("~/.claude/projects")
+    if not os.path.isdir(claude_projects_dir):
+        return None
+
+    turns: List[Dict] = []
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    for proj in os.listdir(claude_projects_dir):
+        p_path = os.path.join(claude_projects_dir, proj)
+        if not os.path.isdir(p_path):
+            continue
+        for fname in os.listdir(p_path):
+            if not fname.endswith(".jsonl"):
+                continue
+            sess_path = os.path.join(p_path, fname)
+            sess_id = fname.replace(".jsonl", "")
+            try:
+                with open(sess_path, "r", encoding="utf-8", errors="replace") as f:
+                    for line in f:
+                        if not line.strip():
+                            continue
+                        try:
+                            d = json.loads(line.strip())
+                        except Exception:
+                            continue
+                        etype = d.get("type")
+                        cnt = d.get("content") or d.get("text") or ""
+                        if not cnt:
+                            continue
+                        cleaned = clean_harness_text(str(cnt))
+                        if len(cleaned) < MIN_TURN_CHARS:
+                            continue
+                        speaker = "user" if etype in ("user_message", "queue-operation") else "assistant"
+                        turns.append({
+                            "speaker": speaker,
+                            "content": cleaned,
+                            "date_str": date_str,
+                            "session_id": sess_id[:8],
+                        })
+            except Exception:
+                continue
+    return turns if turns else None
+
+
+def collect_custom_manifest_chunks() -> Optional[List[Dict]]:
+    """
+    Generic harness discovery via .agents/harness.json:
+    Allows users or unknown harnesses to declare custom session files declaratively
+    without writing Python code:
+    {
+      "my_harness": {
+        "file": "path/to/sessions.jsonl",
+        "format": "jsonl"
+      }
+    }
+    """
+    manifest_path = os.path.join(WORKSPACE_DIR, ".agents", "harness.json")
+    if not os.path.exists(manifest_path):
+        return None
+
+    turns: List[Dict] = []
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+        for h_name, h_info in cfg.items():
+            fpath = os.path.expanduser(h_info.get("file", ""))
+            if not os.path.exists(fpath):
+                continue
+            date_str = datetime.now().strftime("%Y-%m-%d")
+            # Parse jsonl
+            if fpath.endswith(".jsonl"):
+                with open(fpath, "r", encoding="utf-8", errors="replace") as sf:
+                    for line in sf:
+                        if not line.strip():
+                            continue
+                        try:
+                            d = json.loads(line)
+                            cnt = d.get("content") or d.get("text") or ""
+                            cleaned = clean_harness_text(cnt)
+                            if len(cleaned) >= MIN_TURN_CHARS:
+                                turns.append({
+                                    "speaker": d.get("role") or d.get("speaker") or "user",
+                                    "content": cleaned,
+                                    "date_str": date_str,
+                                    "session_id": h_name,
+                                })
+                        except Exception:
+                            continue
+    except Exception as exc:
+        print(f"⚠️ Custom harness manifest could not be parsed: {exc}")
+    return turns if turns else None
+
+
 def harness_warning_write(missing: List[str]) -> None:
     """Leave an actionable notice when no known harness environment was found."""
     lines = [
@@ -430,6 +587,9 @@ def harness_warning_clear() -> None:
 HARNESS_ADAPTERS = [
     ("antigravity", "~/.gemini/antigravity/brain", collect_antigravity_chunks),
     ("hermes", "~/.hermes/state.db", collect_hermes_chunks),
+    ("goose", "~/.local/share/goose/sessions/sessions.db", collect_goose_chunks),
+    ("claude-code", "~/.claude/projects", collect_claude_code_chunks),
+    ("custom-manifest", ".agents/harness.json", collect_custom_manifest_chunks),
 ]
 
 

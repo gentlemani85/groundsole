@@ -95,11 +95,11 @@ Remove-Item -Recurse -Force .temp_groundsole
 ## Schritt 4: Was damit bereitsteht
 
 Nach diesem Schritt verfügt der Nutzer über:
-1. **Dauerhaftes Gedächtnis:** Kann sich an frühere Gespräche, Notizen und Vereinbarungen erinnern (`memory.py`, `memory_retriever.py`).
-2. **Dokumenten-Export:** Erstellt auf Zuruf saubere **Word-Dokumente (`.docx`)** und druckreife **PDF-Dateien (`.pdf`)** (`document_exporter.py`).
-3. **16:9 Präsentationen (Markdown als SSOT):** Erstellt interaktive 16:9 HTML-Folien, deren Text der Nutzer direkt im Editor in einer Markdown-Datei bearbeiten kann (`skills/presentation-deck`, `tools/scripts/sync_slides.py`).
-4. **E-Mail-Verbindung:** Kann bei Bedarf mit Gmail oder dem eigenen Postfach verbunden werden (`mail_helper.py`).
-5. **Schulfach- / Projekt-Cockpit:** Übersicht über Fächer, Aufgaben und Ziele (`00_MEMORY/modules/`).
+1. **Dauerhaftes Gedächtnis:** Kann sich an frühere Gespräche, Notizen und Vereinbarungen erinnern (`memory.py`, `memory_retriever.py`, `crystallize_memory.py`).
+2. **Ordner- & Sachgedächtnis (`space-sync`):** Erkennt automatisch Dokumente, Rechnungen und Verträge in deinen Fachordnern.
+3. **Automatische Archivierung (`export_session.py`):** Sichert und strukturiert Gespräche verlustfrei über alle Harnesses hinweg.
+4. **Lebensbereich- / Projekt-Cockpit:** Übersicht über Aufgaben, Finanzen und Ziele (`00_MEMORY/modules/`).
+5. **Erweiterbar nach Bedarf:** Zusätzliche Spezialwerkzeuge (wie PDF/Word-Export, 16:9-Präsentationen oder E-Mail-Assistenten) können jederzeit modular aus dem Erweiterungs-Katalog (`groundsole-extensions`) hinzugefügt werden.
 
 ---
 

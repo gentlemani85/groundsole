@@ -30,7 +30,7 @@ When triggered, execute the following audit routine deterministically:
 - Clean ephemeral Python caches (`__pycache__/`, `*.pyc`).
 
 ### 2. Single Source of Truth (SSOT) & Link Integrity
-- Inspect relative links and Markdown cross-pointers in `00_MEMORY/index.md`, `00_MEMORY/LOAD_ORDER.md`, and active domain modules.
+- Inspect relative links and Markdown cross-pointers in `AGENTS.md`, `00_MEMORY/DYNAMIC_STATE.md`, and active domain modules.
 - Ensure every referenced file actually exists on disk.
 - Detect accidental data duplication across multiple modules.
 

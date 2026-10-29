@@ -71,7 +71,7 @@ To avoid "Lost in the Middle" degradation and ballooning token consumption, Grou
 
 ## 3. Subagent Token Protection
 
-When subagents or background tasks are spawned, they halt their load order immediately after reading `index.md`. They bypass all domain modules and style guides, reserving 100% of their context budget for their specialized task.
+When subagents or background tasks are spawned, they halt their load order immediately after reading `AGENTS.md`. They bypass all domain modules and style guides, reserving 100% of their context budget for their specialized task.
 
 ---
 

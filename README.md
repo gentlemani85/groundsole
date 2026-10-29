@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Public_Release-emerald.svg)](https://github.com/gentlemani85/groundsole)
 
-> **The grounded operating framework for sovereign AI coprocessors.**  
+> **The grounded operating framework for sovereign, personal AI coprocessors.**  
 > *Biophysical causality, plaintext SSOT, multi-DB memory sharding, and radical tool neutrality.*
 
 [🇩🇪 Deutsche Version / German Edition](README_DE.md)
@@ -12,20 +12,18 @@
 
 ## 💡 What is Groundsole? (Executive Summary)
 
-### The Shift: From Isolated Chat Windows to a Continuous Workspace
+### The Shift: From Disposable Chat Windows to a Sovereign Personal Cognitive Organ
 Until recently, most people used AI through **browser-based web chats** or fragmented chat windows. This workflow is fundamentally siloed: a new chat must be opened for every subtask, context is lost the moment a session closes, and the user constantly starts from scratch.
 
-Even modern **Agentic Harnesses** (such as *Claude Code*, *Google Antigravity*, *Hermes Agent*, or *Cursor*) that run locally and edit files do not resolve this friction on their own: their internal memory remains trapped in their proprietary silos, a shared multi-agent or team workspace is missing, and interactions remain restricted to isolated coding tasks.
+Even modern **Agentic Harnesses** (such as *Google Antigravity*, *Hermes Agent*, *Goose*, *Claude Code*, or *Cursor*) that run locally and edit files do not resolve this friction on their own: their internal memory remains trapped in their proprietary silos, cross-session continuity is missing, and interactions remain restricted to isolated coding tasks.
 
-### The Solution: Groundsole is the Operating Framework for Your AI Coprocessor
-**Groundsole transforms isolated AI developer tools into a permanent, unified work environment with a persistent counterpart that shares your entire context.** It establishes an open architecture for your AI to act as a true, grounded coprocessor:
+### The Solution: Groundsole is the Operating Framework for Your Personal AI Coprocessor
+**Groundsole transforms isolated AI developer tools into a permanent, lifelong thinking environment with a persistent counterpart that shares your entire context.** It establishes an open architecture for your AI to act as a true, grounded coprocessor:
 
 1. **A Continuous Memory Stream Instead of Topic Silos:** You no longer need to compartmentalize your thoughts into 50 topic-specific folders or specialized bots ("Bot for Project A, Chat for Taxes, Chat for Personal"). You work freely across topics in natural episodes. When a session concludes and is frozen via `stream-archive`, Groundsole's architecture (via semantic vectors, fact extraction, and offline `dreaming.py`) crystallizes knowledge into the right domains in the background. You start every new session with a fresh, unbloated context window—while your coprocessor retains instant recall through deterministic retrieval.
 2. **A Genuine Counterpart (Grounded Coprocessor):** Your AI partner knows your history, real project states, contracts, and operational guidelines. It thinks alongside you, rigorously validates biophysical causality, and challenges incomplete assumptions rather than generating superficial polite text.
-3. **Seamless Shared Cognitive Spaces (Teams & Collaborators):** Decentralized cognition hubs live directly within their respective project directories (`.agents/`). Multiple team members and distinct AI agents can work concurrently against the exact same grounded state without locking or data conflict.
-4. **Radical Provider & Tool Neutrality (Sovereignty):** Your context, memory, and history reside entirely in open text formats (Markdown) and local SQLite databases on your hard drive—never locked into a proprietary vendor cloud. You can use Claude Code today, switch to Hermes Agent tomorrow, and run a fully offline open-source model (such as Mistral or Llama) the day after: your persistent counterpart remains identical.
-5. **Local-First AI Architecture:** Groundsole adheres to the **Local-First AI Manifesto**. Data, memory, tools, and execution run on your local device. The cloud LLM is treated as an interchangeable "inference utility" (commodity power). Organizations and individuals build 100% owned digital assets rather than renting closed SaaS portals.
-
+3. **Radical Provider & Tool Neutrality (Sovereignty):** Your context, memory, and history reside entirely in open text formats (Markdown) and local SQLite databases on your hard drive—never locked into a proprietary vendor cloud. You can use Claude Code today, switch to Goose or Hermes Agent tomorrow, and run a fully offline open-source model (such as Mistral or Llama) the day after: your persistent counterpart remains identical.
+4. **Local-First AI Architecture:** Groundsole adheres to the **Local-First AI Manifesto**. Data, memory, tools, and execution run on your local device. The cloud LLM is treated as an interchangeable "inference utility" (commodity power). You build a 100% owned digital asset rather than renting closed SaaS portals.
 
 ---
 
@@ -81,31 +79,25 @@ groundsole/
 │   ├── 04_SCALABLE_STORAGE_AND_SHARDING.md # Multi-DB sharding & local SSD vs. cloud sync
 │   ├── 05_DOCUMENT_LIFECYCLE_AND_DERIVED_VIEWS.md # 3-Tier Document Governance & Derived Views
 │   ├── 06_CROSS_HARNESS_ENTRY_AND_THE_TRIAD.md # Tool-Neutral Entry Point & The Minimal Core Triad
-│   ├── 07_TEAM_FEDERATION_AND_SHARED_HUBS.md # Two-Tier Federation & Brownfield Ingestion
 │   └── 08_CONTEXT_FILTERING_AND_DREAMING_CONSOLIDATION.md # Zero-Spill Context-Filter MCP & Deep Dreaming
 ├── templates/                         # Clean boilerplate templates
 │   ├── AGENTS.md                      # Universal agent entry point (Minimal Core Triad)
-│   ├── index.md                       # Authoritative memory index
-│   ├── LOAD_ORDER.md                  # Minimal runtime load order (legacy fallback)
 │   ├── STYLE_AND_GUARDRAILS.md        # Coprocessor tone & causality checks
-│   ├── DYNAMIC_STATE.md               # Active operational focus
+│   ├── DYNAMIC_STATE.md               # Active operational focus & module pointers
 │   ├── bootstrap.md                   # Self-Executing Master Bootstrap Prompt
-│   ├── team_hub/                      # Shared organizational hub templates (SharePoint/Cloud)
-│   ├── team_spoke/                    # Personal workstation anchor pointing to team hub
 │   └── modules/                       # Universal domain state modules
 │       ├── OPERATIONS_AND_PROJECTS.md # Deliverables & milestones (personal / team)
 │       ├── RESOURCES_AND_FINANCE.md   # Liquidity, budgets & commitments
 │       ├── INFRASTRUCTURE_AND_ASSETS.md# Workstations, environments & tooling
 │       └── LEARNING_AND_SKILLS.md     # Academic curricula & skill mastery
-├── skills/                            # Pre-configured Groundsole skills
+├── skills/                            # Core Groundsole Skills
 │   ├── stream-archive/                # Sanitizes, signs, and freezes sessions into transcripts
 │   ├── memory-engine/                 # Autonomous memory persist, retrieval & dreaming engine
 │   ├── memory-recall/                 # Unified search across vectors, graph, facts & plaintext
-│   ├── document-export/               # Exports Markdown to Word (.docx) and A4 PDF (.pdf)
-│   ├── presentation-deck/             # Self-contained 16:9 interactive HTML presentations
+│   ├── space-sync/                    # Autonomous cognitive hub synchronizer for local files & spaces
+│   ├── grounding-core/                # Pure via-negativa epistemic demarcation & grounding shield
+│   ├── guardrails-sop/                # Standard operating procedure for constitutional governance
 │   ├── groundsole-onboarding/         # Cognitive onboarding & interactive tutorial
-│   ├── space-sync/                    # Deterministic delta sync across distributed team spaces
-│   ├── mail-manager/                  # Checks and sends emails via IMAP/SMTP (Gmail, Outlook)
 │   ├── system-hygiene/                # Entropy reduction, cache cleanup & link audit
 │   └── inbox-triage/                  # Deterministic ingestion of raw files from Inbox/
 └── tools/                             # Automation & Execution Engines
@@ -113,20 +105,18 @@ groundsole/
     ├── check_update.py                # Decentralized upstream update checker
     └── scripts/                       # Core Python Utility & Memory Engines
         ├── memory.py                  # Key-value fact store with cloud conflict resolution & gatekeeping
-        ├── memory_indexer.py          # FastEmbed Jina ONNX transcript vector indexer
+        ├── memory_indexer.py          # FastEmbed Jina ONNX multi-harness vector indexer
         ├── memory_retriever.py        # Multi-DB federated semantic search engine
         ├── crystallize_memory.py      # Post-archival fact & graph crystallizer (Gemini Flash Lite)
         ├── dreaming.py                # Deep Dreaming biophysical memory consolidation & decay
+        ├── export_session.py          # Universal zero-token session exporter (Antigravity, Hermes, Goose, Claude Code)
         ├── context_filter_mcp.py      # Zero-spill terminal & web MCP proxy with SQLite FTS5
         ├── cockpit.py                 # Platform-agnostic local web cockpit & dynamic app launcher
-        ├── export_hermes_session.py   # Lossless zero-token Hermes session exporter (SQLite)
-
-        ├── export_antigravity_session.py # Zero-token Antigravity session exporter (JSONL)
         ├── knowledge_graph.py         # Zero-API relational knowledge graph (SQLite)
-        ├── check_integrity.py         # Zero-dependency link, module & integrity linter
-        ├── document_exporter.py       # Word (.docx) and print-ready PDF generator
-        └── mail_helper.py             # Zero-dependency IMAP/SMTP email assistant
+        └── check_integrity.py         # Zero-dependency link, module & integrity linter
 ```
+
+> 📦 **Optional Community Extensions:** Specialized skills (such as document export, presentation decks, mail management, OCR, and specialized scrapers) are maintained separately in [groundsole-extensions](https://github.com/gentlemani85/groundsole-extensions).
 
 ---
 

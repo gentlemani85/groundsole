@@ -50,18 +50,17 @@ vectors/
 
 ---
 
-## 3. Multi-Tenant & Collaborative Federation (IST-Stand)
+## 3. Scoped Identity & Spaces (IST-Stand)
 
-In shared workspaces (e.g. family environments, research teams, or corporate divisions), database files are partitioned by identity while remaining federated:
+In multi-person workspaces (e.g. couples, co-creators, or small research partnerships), database files are cleanly partitioned by identity while remaining locally queryable:
 
 ```text
-PARTNERSHIP_SPACE / TEAM_SPACE
+SHARED_WORKSPACE /
 ├── vectors/
 │   ├── user_archive_001.db     (User sealed historical archive)
 │   ├── user_active.db          (User active working memory)
 │   ├── partner_archive_001.db  (Partner sealed archive)
-│   ├── partner_active.db       (Partner active memory)
-│   └── team_shared.db          (Shared organizational knowledge)
+│   └── partner_active.db       (Partner active memory)
 ```
 
 ### Scoped Retrieval

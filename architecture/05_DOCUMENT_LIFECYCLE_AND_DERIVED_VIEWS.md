@@ -1,19 +1,17 @@
-# 05 - Document Lifecycle, Quality Assurance & Derived Views
+# 05 - Document Lifecycle, Plaintext SSOT & Derived Views
 
-> **Status:** 2026-09-22  
 > **Framework:** Groundsole  
-> **Architecture Pattern:** 3-Tier Document Lifecycle & CQRS Materialized Views
+> **Architecture Pattern:** 3-Tier Document Hierarchy & Pure Materialized Projections
 
 ---
 
 ## 1. Context & Motivation
 
-In any organization scaling its AI integration, documentation and communication rapidly face two failure modes:
-1. **The Drift of Unchecked Edits:** AI agents modify authoritative records (e.g. security audits, license matrices), but stale approvals remain displayed, rendering quality seals meaningless.
-2. **Consultant Puffery & Hallucinated Metrics:** AI systems tend to invent grandiose marketing claims or extrapolate trivial adjustments into inflated annual "cost-savings" figures that damage professional credibility.
-3. **Hardcoded Presentation Silos:** Summary dashboards often maintain parallel hardcoded HTML/code tables rather than rendering directly from the underlying data source, leading to conflicting truths.
+In a personal cognitive workspace powered by local and cloud AI agents, files quickly face two failure modes:
+1. **The Trap of Parallel Copies:** Summary dashboards or slide decks maintain hardcoded text copies instead of reading directly from the underlying markdown source, creating conflicting truths.
+2. **Loss of Epistemic Integrity:** Ephemeral chat working thoughts or speculative drafts get conflated with immutable personal facts and verified decisions.
 
-To eliminate these vulnerabilities, Groundsole establishes a formal **3-Tier Document Lifecycle** and **Materialized Projection Architecture**.
+To maintain perfect mental clarity, Groundsole establishes a clean **3-Tier Document Hierarchy**.
 
 ---
 
@@ -21,65 +19,49 @@ To eliminate these vulnerabilities, Groundsole establishes a formal **3-Tier Doc
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Tier 1: Working / Raw Artifacts (Ungelenkte Arbeitsdaten)  │
-│  • Scratchpads, raw scans, transcripts, exploratory notes   │
-│  • High velocity, fluid edits, 0% formal review overhead    │
+│  Tier 1: Working / Raw Artifacts (Ephemere Arbeitsdaten)     │
+│  • Scratchpads, raw scans, active session logs, drafts      │
+│  • High velocity, fluid edits, cognitive RAM                │
 └──────────────────────────────┬──────────────────────────────┘
-                               │ Structured & Curated into
+                               │ Crystallized & Curated into
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Tier 2: Authoritative Master Records (Gelenkte SSOT)       │
-│  • Reversible, versioned source of truth in Git             │
-│  • Machine-readable YAML Front-Matter governance            │
-│  • Strict Human-in-the-Loop Quality Management (QM) seal    │
+│  Tier 2: Authoritative Master Records (Autoritative SSOT)   │
+│  • Durable knowledge modules (Markdown) and local SQLite    │
+│  • Git-versioned single source of truth                     │
+│  • Grounded facts, verified contracts, core principles      │
 └──────────────────────────────┬──────────────────────────────┘
                                │ Compiled / Projected into
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Tier 3: Derived Views (Abgeleitete / Materialisierte Sicht)│
-│  • Executive dashboards, management cockpits, slide decks   │
+│  • Personal cockpits, interactive HTML decks, PDF exports   │
 │  • 100% deterministically generated from Tier 2             │
-│  • Strictly read-only: Manual edits are strictly forbidden  │
+│  • Strictly read-only: Manual edits in Tier 3 are forbidden │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Tier 2 Governance & The Invalidation Law
+## 3. Tier 2: The Plaintext Source of Truth (SSOT)
 
-Authoritative documents (Tier 2) must include standardized YAML Front-Matter metadata at the very beginning of the plaintext file:
-
-```yaml
----
-title: System Architecture & Security Audit
-tier: 2
-version: 1.2
-status: in_review       # draft | in_review | approved
-author: Lead Architect
-reviewed_by: Lead Auditor
-reviewed_at: 2026-09-22 15:00
----
-```
-
-### The Invalidation Law
-* **Automatic Seal Revocation:** Whenever an AI agent or human modifies the content of a Tier 2 document, the status **must immediately revert to `in_review`** (or `draft`).
-* **No Retrospective False Seals:** A document must never display an "Approved" seal if any data inside was modified after the recorded timestamp.
-* **Human-in-the-Loop Sovereign:** Only an explicit verification by the designated human reviewer restores the status to `approved`.
+Every durable decision, life parameter, and project state lives in **exactly one canonical Markdown file** or the local fact database (`langmem_store.db`).
+* **Surgical Edits Only:** AI agents must never overwrite full files with blind dumps. Edits are applied surgically (`replace_file_content`) to preserve human manual edits.
+* **Deterministic Traceability:** Every change is locally tracked in Git, ensuring 100% reversibility and autonomy.
 
 ---
 
 ## 4. Tier 3: The Materialized View Principle
 
-Dashboards (web frontends, status monitors, executive summaries) are **projections**, not databases.
-* **No Parallel Truths:** It is strictly prohibited to hardcode numbers, metrics, or tables in PHP, HTML, or JavaScript templates.
-* **Passive Parsers:** All UI views must either directly parse the Tier 2 Markdown files via lightweight deterministc renderers or consume an automated compile-step (e.g. `MANAGEMENT_COCKPIT.md`).
-* If a metric changes in Tier 2, the Tier 3 dashboard updates automatically on the next page load.
+Presentations, visual cockpits, and web dashboards are **pure projections**, never independent storage locations:
+* **No Hardcoded Data:** Never hardcode metrics, facts, or tables into HTML or presentation templates.
+* **Direct Markdown Binding:** Tools must parse the Tier 2 Markdown files directly or rebuild deterministically from source markdown notes.
+* When Tier 2 updates, Tier 3 updates on reload.
 
 ---
 
-## 5. The Anti-Puffery Rule (Grounded Metrics)
+## 5. The Anti-Puffery Rule (Grounded Facts)
 
-Groundsole strictly bans inflated consultant jargon:
-* **No Artificial Extrapolations:** Never calculate fictitious annual savings (e.g. *"Saves €468/year!"*) from minor operational housekeeping tasks.
-* **Bare Technical Facts:** Metrics must be stated soberly and verifiably (e.g. *"7 unused accounts consolidated into shared mailboxes"*).
-* **Respect Real Business Context:** For an enterprise, trivial recurring software costs are operational background noise; framing them as strategic triumphs demonstrates cognitive detachment.
+Groundsole strictly enforces sober, biophysical communication:
+* **No Artificial Hype:** Never invent hypothetical savings or consulting buzzwords.
+* **Naked Biophysical Facts:** Parameters are stated soberly: real costs, measured latency, hardware wattage, timestamps, and contract terms.

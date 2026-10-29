@@ -50,7 +50,7 @@ Statistical language models tend to confabulate when missing context. Groundsole
 ## 5. Tool Neutrality
 
 Groundsole is strictly agnostic of specific AI client tools:
-- Whether Google Antigravity, Open-Source Hermes Agent, Claude Code, Codex, or Kimi: The system entry point remains standard and unified (`AGENTS.md` and `00_MEMORY/index.md`).
+- Whether Google Antigravity, Open-Source Hermes Agent, Goose, Claude Code, or Codex: The system entry point remains standard and unified (`AGENTS.md` and the Minimal Core Triad).
 - Switching the underlying model or agentic harness leaves 100% of the cognitive state, memory, and personal history intact.
 
 ---

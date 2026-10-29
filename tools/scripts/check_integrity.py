@@ -142,7 +142,7 @@ def scan_markdown_links(target_dir, include_transcripts=False):
 
 def scan_module_registry(target_dir):
     """
-    Verifies that all domain modules in modules/ are mentioned in index.md or LOAD_ORDER.md.
+    Verifies that all domain modules in modules/ are registered in AGENTS.md, DYNAMIC_STATE.md, or ASSET_REGISTRY.md.
     """
     unregistered = []
     
@@ -157,12 +157,13 @@ def scan_module_registry(target_dir):
         return []
         
     index_files = [
+        target_dir / "AGENTS.md",
+        target_dir / "templates" / "AGENTS.md",
+        target_dir / "00_MEMORY" / "DYNAMIC_STATE.md",
+        target_dir / "templates" / "DYNAMIC_STATE.md",
+        target_dir / "00_MEMORY" / "ASSET_REGISTRY.md",
         target_dir / "00_MEMORY" / "index.md",
-        target_dir / "00_MEMORY" / "LOAD_ORDER.md",
-        target_dir / "templates" / "index.md",
-        target_dir / "templates" / "LOAD_ORDER.md",
-        target_dir / "index.md",
-        target_dir / "LOAD_ORDER.md"
+        target_dir / "templates" / "bootstrap.md"
     ]
     
     index_content = ""
@@ -360,9 +361,9 @@ def main():
     if unregistered_modules:
         print(f"\n⚠️  Unregistered Domain Modules ({len(unregistered_modules)}):")
         for mod in unregistered_modules:
-            print(f"   • {mod} is present on disk but missing from index.md / LOAD_ORDER.md")
+            print(f"   • {mod} is present on disk but missing from DYNAMIC_STATE.md / AGENTS.md")
     else:
-        print("✅ Module Registry: All domain modules are registered in memory index.")
+        print("✅ Module Registry: All domain modules are registered in living state.")
         
     anomalies = scan_temporal_anomalies(root_dir)
     if anomalies:
